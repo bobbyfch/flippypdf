@@ -31,8 +31,7 @@ document.querySelector('#read').addEventListener('click', () => viewer.open());
 
 Stylesheet juga dimuat otomatis saat open jika belum disertakan. Menyertakan
 link CSS di atas memberi kontrol CSP dan loading lebih jelas. Jalur CDN JS,
-CSS, dan sound lama dipertahankan. Tag v1 tidak diubah; v2.0.0 adalah branch
-snapshot rilis, bukan penggantian tag lama. Gunakan ref/commit yang sudah diuji
+CSS, dan sound lama dipertahankan. Tag v1 tidak diubah; v2.0.0 memakai tag rilis baru, tanpa mengganti tag lama. Gunakan ref/commit yang sudah diuji
 untuk production. URL tanpa versi mengikuti perkembangan repository dan cache CDN.
 
 ## ESM / TypeScript

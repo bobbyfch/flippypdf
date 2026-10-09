@@ -1,6 +1,6 @@
 # FlippyPDF 2.0 migration
 
-The `v2.0.0` ref is a release snapshot branch, kept at the tested v2 commit.
+The `v2.0.0` ref is a release tag, kept at the tested v2 commit.
 Existing v1 tags remain untouched. Applications should pin a tested ref or
 commit; never use the unversioned URL for production. No npm registry
 publication is implied by this repository release.
