@@ -1,12 +1,12 @@
-<p align="center"><img src="logo.svg" width="88" alt="Burung hijau FlippyPDF"></p>
+<p align="center"><img src="logo.svg" width="88" alt="Lambang buku terbuka Sela"></p>
 
-# FlippyPDF 🌿
+# Sela 📖
 
 **Ceritamu. Ritme bacamu.** Reader web ringan dengan book flip, manga kanan ke kiri, webtoon tanpa jarak, dan mode satu halaman.
 
 [English](README.md) · [Demo interaktif](https://bobbyfch.github.io/flippypdf/) · [Integrasi](docs/integrations.md) · [Format & batasan](docs/formats.md)
 
-[![Tampilan reader FlippyPDF](site/preview-reader.jpg)](https://bobbyfch.github.io/flippypdf/)
+[![Tampilan reader Sela](site/preview-reader.jpg)](https://bobbyfch.github.io/flippypdf/)
 
 ## ✨ Yang tersedia
 
@@ -18,15 +18,15 @@
 - Bookmark, progres tersimpan, filter warna, light/dark/system, reduced motion.
 - Playground untuk mengganti parameter sebelum dan saat membaca.
 
-Tanpa Bootstrap, jQuery, atau icon font wajib. Interface sekitar **21,4 KiB gzip**; adapter EPUB/CBZ sekitar **6,1 KiB gzip**, dimuat terpisah. PDF.js + worker modern menambah sekitar **491 KiB gzip**, belum termasuk font/CMap bila diperlukan. Ukuran total tetap mengikuti renderer dan dokumen yang digunakan.
+Tanpa Bootstrap, jQuery, atau icon font wajib. Interface sekitar **22,6 KiB gzip**; adapter EPUB/CBZ sekitar **6,8 KiB gzip**, dimuat terpisah. PDF.js + worker modern menambah sekitar **491 KiB gzip**, belum termasuk font/CMap bila diperlukan. Ukuran total tetap mengikuti renderer dan dokumen yang digunakan.
 
 ## 🚀 Pasang
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.2.0/dist/js/flippy.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v3.0.0/dist/js/sela.min.js"></script>
 <button id="baca">Baca cerita</button>
 <script>
-const reader = new Flippy({
+const reader = new Sela({
   url: '/buku/cerita.pdf', mode: 'webtoon', pageGap: 0,
   theme: 'auto', paperTexture: true
 });
@@ -52,7 +52,7 @@ CI3, Laravel, Vue, React, Svelte, Angular, Astro, TypeScript dan HTML biasa puny
 
 File yang dipilih di demo diproses di browser tanpa diunggah. Progress/bookmark memakai localStorage bila tersedia. Browser lama mendapat jalur PDF asli melalui compatibility entry, bukan seluruh fitur modern. Pengujian memakai Edge/Chromium dan emulasi viewport mobile; belum menguji semua perangkat fisik.
 
-MIT untuk FlippyPDF, PDFlipbook dan fflate; PDF.js Apache-2.0. Decoder DjVu eksternal GPL-2.0 tidak dibundel. [Lisensi pihak ketiga](THIRD_PARTY_NOTICES.md).
+MIT untuk Sela, PDFlipbook dan fflate; PDF.js Apache-2.0. Decoder DjVu eksternal GPL-2.0 tidak dibundel. [Lisensi pihak ketiga](THIRD_PARTY_NOTICES.md).
 
 Kalau membantu proyekmu, ⭐ memudahkan orang lain menemukannya. Untuk laporan bug, sertakan contoh dokumen, browser, mode, dan langkah reproduksi.
 
@@ -61,3 +61,24 @@ Kalau membantu proyekmu, ⭐ memudahkan orang lain menemukannya. Untuk laporan b
 [Riset dan roadmap](docs/roadmap.md) · [Panduan kontribusi](CONTRIBUTING.md)
 
 Prioritas yang diusulkan: pencarian dan teks PDF yang aksesibel, navigasi EPUB lebih lengkap, fokus panel komik, lalu anotasi yang bisa diekspor. Semua masih rencana, bukan fitur yang sudah dirilis. Instalasi npm registry juga belum tersedia; saat ini gunakan CDN, GitHub atau self-hosted assets.
+
+## Di antara waktu, di dalam cerita
+
+**Sela** adalah jeda yang tak kosong: tempat halaman membuka jalan, dan cerita menemukan pulang. Nama baru ini menggantikan FlippyPDF; alamat repo dan CDN lama dipertahankan agar integrasi tetap berjalan. `Sela` dan `Flippy` memakai constructor yang sama.
+
+### Fitur v3
+
+- Daftar isi/penanda bawaan PDF dan EPUB, termasuk navigasi NCX serta tautan jangkar.
+- Pencarian teks dan transkrip yang dapat dipilih; PDF pindai dan komik perlu OCR dari luar.
+- TTS dari suara browser/OS, tanpa API berbayar atau model besar. Suara lokal diprioritaskan; suara daring harus dipilih secara sadar. Suara Indonesia dan perilaku jeda/latar bergantung pada perangkat.
+- Catatan per halaman/bab dan ekspor/impor JSON untuk catatan serta bookmark pribadi.
+- TXT, Markdown dasar, HTML aman dan FB2 berbasis teks; format ini memakai modul kecil terpisah.
+- Rak buku lokal IndexedDB dan persiapan offline. Simpan berkas asli karena penyimpanan browser dapat terhapus.
+- Paket extension Chromium dan Firefox untuk pengujian lokal, belum dipublikasikan di store.
+- Mode otomatis satu halaman dalam portrait; tombol putar layar hanya bekerja jika browser/device mengizinkan.
+
+Modul alat baca sekitar **4 KiB gzip**, adapter teks sekitar **2,5 KiB gzip**. Keduanya dimuat saat diperlukan. Beban mesin PDF dan berkas buku dihitung terpisah.
+
+Web publik memilih bahasa berdasarkan negara IP melalui country.is pada kunjungan pertama; pilihan manual tersimpan selalu didahulukan. Negara Indonesia memakai Indonesia, lainnya Inggris. Jika gagal, bahasa browser menjadi cadangan. Tambahkan `?geo=off` untuk menonaktifkan lookup; dokumen tidak pernah dikirim. Library embed tidak melakukan lookup IP.
+
+[Panduan offline & extension](docs/offline-extension.md) · [Riset dan batas kemampuan](docs/roadmap.md) · [Panduan lengkap Inggris](README.md)

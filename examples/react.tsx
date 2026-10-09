@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import Flippy, { type FlippyMode } from 'flippypdf';
+import Flippy, { type FlippyMode } from '@bobbyfch/sela';
 
 export function PdfButton({ url, mode = 'book', onError = console.error }: {
   url: string; mode?: FlippyMode; onError?: (error: Error) => void;

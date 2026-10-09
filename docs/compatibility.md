@@ -6,7 +6,8 @@ The interactive reader requires ES2020, dynamic modules, module workers, Pointer
 | --- | --- | --- |
 | Current Edge / Windows | Interactive viewer | Local browser suite |
 | Chromium / Linux | Interactive viewer | GitHub Actions suite |
-| Current Firefox / Safari | Intended support with matching APIs | Not device-tested in this release |
+| Playwright WebKit / Windows | Interactive viewer, formats and offline shelf | 35 browser scenarios passed; this is not physical Safari/iOS verification |
+| Current Firefox | Intended support with matching APIs | Local test runtime failed to launch (Windows SideBySide/mozglue assembly); Linux CI remains the verification gate |
 | Android / iOS | Responsive modes and fullscreen fallback | Mobile viewport emulation, not physical devices |
 | Missing required capabilities, including IE | Original HTTP(S) PDF via compat entry | Capability removal tested in Chromium |
 | JavaScript disabled / blocked | Normal PDF link | Demo includes noscript |
@@ -16,5 +17,9 @@ PDF.js 4.10.38 ships matching modern and legacy bundles. A legacy build cannot g
 Always retain a direct PDF link. CSP must allow scripts/styles and module workers (blob: for cross-origin workers). Authentication and CORS still apply. Windows, macOS, Linux, Android, iOS and ChromeOS are browser hosts, not separate native builds.
 
 EPUB additionally needs Shadow DOM and TextDecoder, CBZ needs image decoding, and optional DjVu needs createImageBitmap plus the external decoder's blob worker. The old-browser fallback applies to PDF; EPUB/CBZ/DjVu need a capable browser or an alternative server conversion. Touch pinch is covered by synthetic pointer tests; physical mobile gesture behavior remains unverified. See [format scope](formats.md).
+
+Sela 3.0 validation: all 70 Chromium/WebKit scenarios passed, including real PDF/EPUB outlines, search, notes import/export, safe text formats, portrait/landscape transitions and a saved PDF reopened after network disconnection. The packaged Chromium extension was also tested in an actual temporary Edge extension context. Firefox extension signing/store review and physical devices remain unverified.
+
+TTS uses optional Web Speech and defaults to voices reporting `localService`. Voice availability and language quality depend on the browser and installed OS voices; local testing found English voices but no Indonesian local voice. No paid service or API key is required. Browsers without speech support keep the transcript available. Screen orientation locking requires browser/OS support and may require fullscreen; denial leaves ordinary responsive reading available.
 
 SEO: static crawlable content, canonical/description/Open Graph/Twitter tags, SoftwareApplication JSON-LD and sitemap. llms.txt is agent documentation, not a ranking mechanism. [Google AI features use the same foundational SEO practices](https://developers.google.com/search/docs/appearance/ai-features). Indexing, rankings and AI inclusion are not guaranteed. A GitHub project cannot supply origin-root robots.txt; the project-level file documents policy. Submit the sitemap to Search Console after verifying ownership.

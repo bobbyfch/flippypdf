@@ -1,23 +1,8 @@
 import { unzipSync } from 'fflate';
 import { bindZoomGestures } from './gestures.js';
 
-const MAX = 64 * 1024 * 1024;
-export async function readBytes(options, signal) {
-  if (options.data) {
-    const bytes = new Uint8Array(options.data);
-    if (bytes.length > MAX) throw new Error('Document exceeds the 64 MiB archive limit');
-    return bytes.slice();
-  }
-  const response = await fetch(options.url, {signal,headers:options.httpHeaders,credentials:options.withCredentials?'include':'same-origin'});
-  if (!response.ok) throw new Error(`Document HTTP ${response.status}`);
-  if (Number(response.headers.get('content-length')) > MAX) throw new Error('Document exceeds the archive limit');
-  const reader=response.body?.getReader();
-  if(!reader) { const bytes=new Uint8Array(await response.arrayBuffer());if(bytes.length>MAX)throw new Error('Document too large');return bytes; }
-  const chunks=[];let length=0;
-  try { while(true){const {done,value}=await reader.read();if(done)break;length+=value.length;if(length>MAX)throw new Error('Document exceeds the archive limit');chunks.push(value);} }
-  catch(error){await reader.cancel();throw error;}
-  const bytes=new Uint8Array(length);let offset=0;for(const chunk of chunks){bytes.set(chunk,offset);offset+=chunk.length;}return bytes;
-}
+import { readBytes } from './bytes.js';
+export { readBytes } from './bytes.js';
 export function extractArchive(bytes) {
   let total=0,count=0;
   return unzipSync(bytes,{filter:file=>{
@@ -51,6 +36,8 @@ export class Epub {
       if(!['application/xhtml+xml','text/html'].includes(resource.getAttribute('media-type')))throw new Error('Only HTML EPUB spine content is supported');
       return path(resource.getAttribute('href'),opfPath);
     });
+    this.language=nodes(opf,'language')[0]?.textContent||'';
+    this.outline=this.readOutline(opf,items,opfPath);
     this.numPages=this.chapters.length;if(!this.numPages)throw new Error('EPUB has no chapters');
     if(this.chapters.some(name=>!this.files[name]))throw new Error('EPUB spine references a missing chapter');
     if(this.chapters.reduce((size,name)=>size+this.files[name].length,0)>16*1024*1024)throw new Error('EPUB chapter text exceeds 16 MiB');
@@ -67,6 +54,7 @@ export class Epub {
     if(node.nodeType===3)return document.createTextNode(node.textContent);
     if(node.nodeType!==1 || !allowed.has(node.localName.toLowerCase()))return document.createTextNode('');
     const el=document.createElement(node.localName.toLowerCase());
+    if(node.id)el.id=node.id;
     if(el.localName==='img'){
       const src=node.getAttribute('src')||'';
       if(!/^[a-z]+:|^\/\//i.test(src)){const name=path(src,base);const type=imageType(name);if(type&&this.files[name]){const url=URL.createObjectURL(new Blob([this.files[name]],{type}));this.urls.push(url);el.src=url;}}
@@ -74,10 +62,24 @@ export class Epub {
     }
     if(el.localName==='a'){
       const href=node.getAttribute('href')||'';
-      if(!/^[a-z]+:|^\/\//i.test(href)) {const index=this.chapters.indexOf(path(href,base));if(index>=0){el.href='#chapter-'+(index+1);el.addEventListener('click',event=>{event.preventDefault();this.goTo(index+1);});}}
+      if(!/^[a-z]+:|^\/\//i.test(href)) {const index=this.chapters.indexOf(path(href,base));if(index>=0){el.href='#chapter-'+(index+1);el.addEventListener('click',event=>{event.preventDefault();this.goToLocation({page:index+1,anchor:new URL(href,'https://archive.invalid/'+base).hash.slice(1)});});}}
     }
     for(const child of node.childNodes)el.appendChild(this.sanitize(child,base));return el;
   }
+  readOutline(opf,items,base){
+    const nav=Array.from(items.values()).find(el=>(el.getAttribute('properties')||'').split(/\s+/).includes('nav'));
+    const location=(href,navPath)=>{const target=new URL(href,'https://archive.invalid/'+navPath);return {page:this.chapters.indexOf(decodeURIComponent(target.pathname.slice(1)))+1,anchor:decodeURIComponent(target.hash.slice(1))};};
+    if(nav){const navPath=path(nav.getAttribute('href'),base);const doc=xml(this.files[navPath]);const root=nodes(doc,'nav').find(el=>(el.getAttributeNS('http://www.idpf.org/2007/ops','type')||el.getAttribute('epub:type')||'').split(/\s+/).includes('toc'))||nodes(doc,'nav')[0];
+      const walk=ol=>Array.from(ol?.children||[]).filter(el=>el.localName==='li').map(li=>{const a=Array.from(li.children).find(el=>el.localName==='a');return {title:a?.textContent||li.firstChild?.textContent||'…',...location(a?.getAttribute('href')||'',navPath),items:walk(Array.from(li.children).find(el=>el.localName==='ol'))};});
+      if(root)return walk(nodes(root,'ol')[0]);
+    }
+    const ncx=Array.from(items.values()).find(el=>el.getAttribute('media-type')==='application/x-dtbncx+xml');
+    if(ncx){const navPath=path(ncx.getAttribute('href'),base);const doc=xml(this.files[navPath]);const walk=parent=>Array.from(parent?.children||[]).filter(el=>el.localName==='navPoint').map(el=>({title:nodes(el,'text')[0]?.textContent||'…',...location(nodes(el,'content')[0]?.getAttribute('src')||'',navPath),items:walk(el)}));return walk(nodes(doc,'navMap')[0]);}
+    return this.chapters.map((name,i)=>({title:'Chapter '+(i+1),page:i+1}));
+  }
+  getOutline(){return this.outline;}
+  getText(n){const article=this.slots?.[n-1]?.shadowRoot.querySelector('article');const walk=node=>node.nodeType===3?node.textContent:Array.from(node.childNodes).map(walk).join('')+(/^(P|DIV|H[1-6]|LI|BLOCKQUOTE|BR|TR)$/.test(node.nodeName)?'\n':'');return article?walk(article):'';}
+  goToLocation(item){if(!item.page)return;this.goTo(item.page);if(item.anchor){const target=this.slots[item.page-1]?.shadowRoot.getElementById(item.anchor);target?.scrollIntoView({block:'start',behavior:'instant'});}}
   updatePage(n){if(n!==this.page){this.page=n;this.emit('pagechange',{page:n});}}
   goTo(n){n=Math.max(1,Math.min(this.numPages||1,Math.trunc(+n)||1));this.slots?.forEach((el,i)=>{el.hidden=this.opts.mode!=='webtoon'&&i!==n-1;});this.slots?.[n-1]?.scrollIntoView({block:'start',behavior:'instant'});this.updatePage(n);}
   currentPage(){return this.page;}next(){this.goTo(this.page+1);}prev(){this.goTo(this.page-1);}

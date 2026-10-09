@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import Flippy from 'flippypdf';
+  import Flippy from '@bobbyfch/sela';
   let viewer: Flippy | undefined;
   let error = '';
   onMount(() => {

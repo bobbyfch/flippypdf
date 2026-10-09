@@ -7,14 +7,14 @@
   if (capable) {
     win.FlippyReady = new win.Promise(function (resolve, reject) {
       var script = doc.createElement('script'); script.src = base + 'flippy.min.js';
-      script.onload = function () { resolve(win.Flippy); };
+      script.onload = function () { win.Sela = win.Flippy; resolve(win.Flippy); };
       script.onerror = function () { reject(new Error('Flippy could not load; use the direct PDF link.')); };
       doc.head.appendChild(script);
     });
     win.FlippyReady.catch(function () {});
   } else {
     win.Flippy = function (options) { this.options = options || {}; };
-    win.Flippy.supported = false;
+    win.Sela = win.Flippy; win.Flippy.supported = false;
     win.Flippy.prototype.open = function () {
       if (!this.options.pdfUrl && !this.options.url) throw new Error('A PDF URL is required');
       var anchor = doc.createElement('a'); anchor.href = this.options.pdfUrl || this.options.url || '';

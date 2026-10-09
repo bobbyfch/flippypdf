@@ -1,7 +1,7 @@
 <button type="button" id="pdf-reader">Read PDF</button>
 <a href="/story.pdf">Open original PDF</a>
 <script>
-  import Flippy from 'flippypdf';
+  import Flippy from '@bobbyfch/sela';
   let viewer: Flippy | undefined;
   document.querySelector('#pdf-reader')?.addEventListener('click', () => {
     viewer ||= new Flippy({ pdfUrl: '/story.pdf', mode: 'book' });

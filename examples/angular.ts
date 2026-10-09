@@ -1,5 +1,5 @@
 import { Component, OnDestroy } from '@angular/core';
-import Flippy from 'flippypdf';
+import Flippy from '@bobbyfch/sela';
 
 @Component({
   selector: 'app-pdf-reader', standalone: true,

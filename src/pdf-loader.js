@@ -2,7 +2,9 @@ const engines = new Map();
 
 export function safeUrl(value, base) {
   const url = new URL(String(value), base);
-  if (!['http:', 'https:', 'blob:'].includes(url.protocol)) throw new TypeError('Only HTTP(S) and blob URLs are supported');
+  const host = new URL(base);
+  const extensionAsset = ['chrome-extension:', 'moz-extension:'].includes(host.protocol) && url.protocol === host.protocol && url.host === host.host;
+  if (!extensionAsset && !['http:', 'https:', 'blob:'].includes(url.protocol)) throw new TypeError('Only HTTP(S) and blob URLs are supported');
   return url.href;
 }
 

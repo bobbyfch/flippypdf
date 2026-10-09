@@ -209,3 +209,12 @@
 .flippy-epub-chapter{max-width:740px;margin:0 auto 36px;filter:var(--flippy-page-filter,none)}
 .flippy-epub-chapter[hidden]{display:none}
 .library-reader-overlay[data-paper=true] .fb-face::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:repeating-linear-gradient(17deg,#785e3a05 0 1px,transparent 1px 4px),repeating-linear-gradient(107deg,#7d633006 0 1px,transparent 1px 5px);mix-blend-mode:multiply}
+
+.sela-notice:empty{display:none}.sela-notice{margin:0;padding:8px 16px;font-size:12px;background:var(--flippy-panel)}
+.sela-tools{width:min(400px,45vw);flex:none;overflow:auto;padding:20px;border-inline-start:1px solid var(--flippy-border);background:var(--flippy-panel);font-size:13px}
+.sela-tools h3{margin:20px 0 10px;font-size:16px}.sela-tools nav{display:grid;gap:4px}.sela-tools button{color:var(--flippy-fg);background:var(--flippy-button);border:1px solid var(--flippy-border);border-radius:7px;padding:8px;cursor:pointer;text-align:start}.sela-tools button:disabled{opacity:.5;cursor:default}
+.sela-tools input,.sela-tools select{max-width:100%;color:var(--flippy-fg);background:var(--flippy-bg);font:inherit;padding:8px;border:1px solid var(--flippy-border);border-radius:6px}
+.sela-tools select{width:100%}.sela-tools input[type=range]{width:100%}.sela-tools input[type=checkbox]{accent-color:#236947}.sela-tools label{display:block;margin:10px 0}.sela-tools form{display:flex;gap:6px;flex-wrap:wrap}.sela-tools input[type=search]{width:100%}.sela-search-results{display:grid;gap:5px;margin-top:8px}.sela-speech-controls{display:flex;flex-wrap:wrap;gap:6px}.sela-transcript{white-space:pre-wrap;line-height:1.8;max-height:40vh;overflow:auto;margin-top:16px;user-select:text}.sela-tools button:focus-visible,.sela-tools input:focus-visible,.sela-tools select:focus-visible{outline:3px solid #76c99d;outline-offset:2px}
+@media(max-width:720px){.sela-tools{position:absolute;inset:0 0 0 auto;width:min(400px,92vw);z-index:95}.library-reader-actions{flex-wrap:wrap;justify-content:flex-start}.library-reader-close{margin-inline-start:auto}}
+
+.sela-tools textarea{display:block;max-width:100%;width:100%;font:inherit;background:var(--flippy-bg);color:var(--flippy-fg);border:1px solid var(--flippy-border);border-radius:7px;padding:8px;resize:vertical}

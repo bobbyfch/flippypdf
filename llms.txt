@@ -1,5 +1,5 @@
-# FlippyPDF
-> Open-source JavaScript reader for PDF, reflowable EPUB, CBZ and optional DjVu. Renderers load on demand. No Bootstrap or jQuery required.
+# Sela (formerly FlippyPDF)
+> Open-source JavaScript reader for PDF, reflowable EPUB, CBZ, TXT, Markdown, safe HTML, text-only FB2 and optional DjVu. Renderers load on demand. No Bootstrap or jQuery required.
 - Demo: https://bobbyfch.github.io/flippypdf/
 - Source and installation: https://github.com/bobbyfch/flippypdf
 - Documentation: https://github.com/bobbyfch/flippypdf/blob/main/docs/integrations.md
@@ -9,3 +9,7 @@
 - Modes: book, single, webtoon, manga (right-to-left).
 - Privacy: selected demo files are read in the browser; the demo does not upload them.
 - Compatibility: modern browsers; older browsers can open/download the original PDF. OS support depends on the browser.
+
+- Optional tools: embedded contents, extractable-text search/transcript, browser TTS, page/chapter notes and JSON export/import. No OCR, aligned PDF text layer, CFI/highlights, sync, OPDS or MOBI/AZW3.
+- Local shelf: IndexedDB; explicit offline preparation. Unpublished Chromium/Firefox development extension packages.
+- Privacy: first-visit Pages language lookup uses country.is IP-country service; ?geo=off disables. Embed library does not geolocate. Local narration default; online voices optional and may send text to provider.

@@ -4,9 +4,9 @@ export interface FlippyOptions {
   url?: string;
   data?: ArrayBuffer | Uint8Array;
   title?: string;
-  language?: 'en' | 'id';
+  language?: 'en' | 'id' | 'auto';
   mode?: FlippyMode;
-  format?: 'auto' | 'pdf' | 'epub' | 'cbz' | 'djvu';
+  format?: 'auto' | 'pdf' | 'epub' | 'cbz' | 'djvu' | 'txt' | 'md' | 'html' | 'fb2';
   djvujsSrc?: string;
   djvuIntegrity?: string;
   pageGap?: number;
@@ -75,9 +75,13 @@ export declare class Flippy extends EventTarget {
   zoomIn(): this;
   zoomOut(): this;
   setZoom(value: number): this;
+  showTools(): Promise<unknown>;
+  getText(page?: number): Promise<string>;
   toggleFullscreen(): this;
   setFilter(value: NonNullable<FlippyOptions['filter']>): this;
 }
 export declare const VERSION: string;
+export { Flippy as Sela };
+export type SelaOptions = FlippyOptions;
 export default Flippy;
-declare global { interface Window { Flippy: typeof Flippy; } }
+declare global { interface Window { Flippy: typeof Flippy; Sela: typeof Flippy; } }

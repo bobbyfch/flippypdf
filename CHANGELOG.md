@@ -1,5 +1,17 @@
 # 2.2.0 — 2026-10-09
 
+## 3.0.0 — Sela / 2026-10-09
+
+- Rename the product to Sela, with a minimal open-book emblem and Indonesian literary copy; preserve repository/Pages/CDN URLs and Flippy entry points.
+- Add the Sela global/named ESM/type aliases and scoped package identity `@bobbyfch/sela` (GitHub installation).
+- Lazy reading tools: PDF embedded outline, EPUB navigation/NCX and anchors, cancellable text search/transcript, Web Speech TTS, local notes and JSON import/export.
+- Add lazy TXT/basic Markdown/sanitized HTML/text-only FB2 adapter without PDF/ZIP download.
+- Local IndexedDB bookshelf, explicit offline engine/assets preparation and development Chromium/Firefox extension packaging without host permissions.
+- Portrait/spread adaptation preserves portrait page during rotation; supported browsers can request orientation lock in fullscreen.
+- First-visit public Pages language uses bounded IP-country lookup, with manual-choice priority, browser-language fallback and `?geo=off` bypass. The embedding library makes no geolocation requests.
+- Add regression coverage for real embedded PDF bookmarks, EPUB anchors, narration lifecycle, new formats, notes, actual offline PDF reload and extension-safe URLs.
+
+
 - Lazy EPUB/CBZ adapters, optional external DjVu decoder, and real format samples.
 - Seamless configurable webtoon spacing, Ctrl-wheel/touch zoom, global keyboard help and shortcuts.
 - Smoother fold easing, optional paper grain, live demo parameter controls inside the reader.

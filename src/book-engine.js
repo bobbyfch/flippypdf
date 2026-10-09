@@ -517,13 +517,17 @@ export function createBookEngine(global) {
   };
 
   PDFlipbook.prototype._layout = function () {
+    if(this.anim||this.drag)this._finishAnim(true);
     var wanted = this.modeOverride || this._autoMode();
+    var position = this.numPages ? this.currentPage() : this.viewPage;
+    if(this.mode==='double'&&wanted==='single'&&this.current===this._portraitSheet)position=this._portraitPage;
     if (wanted !== this.mode) {
       this.mode = wanted;
       if (this.mode === 'single') {
         // keep showing the first page of the open spread
-        this.viewPage = clamp(this._firstVisiblePage(), 1, this.numPages);
+        this.viewPage = clamp(position, 1, this.numPages);
       }
+      if(this.mode === 'double'){this._portraitPage=position;this.current = this._sheetForPage(position);this._portraitSheet=this.current;}
       this._emit('modechange', { mode: this.mode });
     }
 

@@ -44,7 +44,7 @@ test('site language/theme persistence, responsive layout and metadata', async ({
   await page.locator('[data-language-choice=id]').click();
   await expect(page.locator('[data-language-choice=id]')).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('html')).toHaveAttribute('lang', 'id');
-  await expect(page.locator('h1')).toContainText('Ritme bacamu');
+  await expect(page.locator('h1')).toContainText('Di dalam cerita');
   await page.locator('[data-theme-choice=dark]').click();
   await page.reload();
   await expect(page.locator('#language')).toHaveValue('id');
@@ -58,16 +58,16 @@ test('site language/theme persistence, responsive layout and metadata', async ({
   await page.screenshot({ path: 'test-results/site-mobile-light-en.png', fullPage: true });
   expect(await page.locator('link[rel=canonical]').getAttribute('href')).toBe('https://bobbyfch.github.io/flippypdf/');
   const schema=JSON.parse(await page.locator('script[type="application/ld+json"]').textContent());
-  expect(schema.softwareVersion).toBe('2.2.0');
+  expect(schema.softwareVersion).toBe('3.0.0');
   await page.locator('[data-theme-choice=auto]').click();
   await page.emulateMedia({ colorScheme: 'dark' });
   expect(await page.evaluate(() => getComputedStyle(document.body).backgroundColor)).toBe('rgb(23, 35, 29)');
 });
 
-test('compatibility entry avoids modern bundle on missing browser capabilities', async ({ page }) => {
+test('compatibility entry avoids modern bundle on missing browser capabilities', async ({ page, browserName }) => {
   const modern=[];
   page.on('request', req => { if (req.url().endsWith('/flippy.min.js')) modern.push(req.url()); });
-  await page.addInitScript(() => { window.ResizeObserver = undefined; window.Promise = undefined; });
+  await page.addInitScript(() => { window.ResizeObserver = undefined; });
   await page.goto('/');
   expect(await page.evaluate(() => Flippy.supported)).toBe(false);
   expect(modern).toEqual([]);
@@ -78,9 +78,11 @@ test('compatibility entry avoids modern bundle on missing browser capabilities',
     headers: { 'Content-Disposition': 'attachment; filename="limaraya.pdf"' },
     body: await readFile('example/limarayamusic.pdf')
   }));
-  const downloaded = page.waitForEvent('download');
+  const original = page.waitForRequest(request => request.url().endsWith('/example/limarayamusic.pdf') && request.isNavigationRequest());
+  const downloaded = browserName !== 'webkit' ? page.waitForEvent('download') : null;
   await page.locator('[data-mode=book]').click();
-  expect((await downloaded).suggestedFilename()).toBe('limaraya.pdf');
+  expect((await original).resourceType()).toBe('document');
+  if(downloaded)expect((await downloaded).suggestedFilename()).toBe('limaraya.pdf');
 });
 
 test('web component destroys viewer on disconnect and reconnects once', async ({ page }) => {

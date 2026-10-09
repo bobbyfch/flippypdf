@@ -17,6 +17,8 @@ export function createReader(global, engine) {
     }
 
     var iconPaths = {
+        tools: ['M4 6h16M4 12h16M4 18h16', 'M8 3v6m8 0v6m-8 0v6'],
+        rotate: ['M4 8a8 8 0 0 1 14-3l2 2', 'M20 3v4h-4', 'M20 16a8 8 0 0 1-14 3l-2-2', 'M4 21v-4h4'],
         bookmarks: ['M6 4.75A1.75 1.75 0 0 1 7.75 3h8.5A1.75 1.75 0 0 1 18 4.75V21l-6-3.75L6 21V4.75Z', 'M9 8h6'],
         sound: ['M11 5 6 9H3v6h3l5 4V5Z', 'M15.5 8.5a5 5 0 0 1 0 7', 'M18.5 5.5a9 9 0 0 1 0 13'],
         muted: ['M11 5 6 9H3v6h3l5 4V5Z', 'm16 9 5 6', 'm21 9-5 6'],
@@ -67,6 +69,10 @@ export function createReader(global, engine) {
         if (state.thumbObserver) state.thumbObserver.disconnect();
         state.thumbQueue = [];
         if (state.thumbTasks) state.thumbTasks.forEach(function (task) { task.cancel(); });
+        if(state.book?.getText){save(state.locationKey,{page:state.book.currentPage(),ratio:state.book.container.scrollTop/Math.max(1,state.book.container.scrollHeight-state.book.container.clientHeight)});}
+        state.tools?.destroy();
+        if(state.orientationLocked)global.screen.orientation?.unlock?.();
+        if(document.fullscreenElement === state.shell)document.exitFullscreen?.().catch(()=>{});
         if (state.book) state.book.destroy();
         if (state.options.onClose) state.options.onClose();
         if (state.soundFile) {
@@ -102,6 +108,9 @@ export function createReader(global, engine) {
 
         var key = (options.storagePrefix || 'flippy:') + String(options.id || options.url || 'bytes');
         var state = {
+            locationKey:key+':location',
+            marksKey:key+':marks',
+            notesKey:key+':notes',
             options: options,
             trigger: options.trigger || document.activeElement,
             previousOverflow: document.body.style.overflow,
@@ -145,11 +154,27 @@ export function createReader(global, engine) {
         helpButton.type = 'button'; helpButton.className = 'library-reader-button';
         helpButton.textContent = '?'; helpButton.setAttribute('aria-label', 'Keyboard shortcuts');
         var help = document.createElement('div'); help.className = 'flippy-shortcuts'; help.hidden = true;
-        help.textContent = '← → / PgUp PgDn: navigate · Home / End: first / last · + / −: zoom · 0: reset zoom · F: fullscreen · B: bookmark · M: sound · ?: shortcuts · Esc: close. Ctrl + wheel / trackpad pinch: zoom. EPUB numbers refer to chapters.';
+        help.textContent = '← → / PgUp PgDn: navigate · Home / End: first / last · + / −: zoom · 0: reset zoom · F: fullscreen · B: bookmark · M: sound · ?: shortcuts · Esc: close. Ctrl/Cmd + F: book search. Ctrl + wheel / trackpad pinch: zoom. EPUB numbers refer to chapters.';
         helpButton.setAttribute('aria-expanded','false');
         function toggleHelp() { help.hidden = !help.hidden; helpButton.setAttribute('aria-expanded', String(!help.hidden)); }
         helpButton.addEventListener('click', toggleHelp);
         actions.appendChild(helpButton);
+        var toolsButton=button(options.language==='en'?'Reading tools':'Alat baca',null,'tools');
+        toolsButton.disabled=true;toolsButton.setAttribute('aria-expanded','false');
+        actions.appendChild(toolsButton);
+        var rotateButton=button(options.language==='en'?'Rotate screen':'Putar layar',null,'rotate');
+        if(!global.screen?.orientation?.lock)rotateButton.disabled=true;
+        actions.appendChild(rotateButton);
+        state.shell=shell;
+        var notice=document.createElement('p');notice.className='sela-notice';notice.setAttribute('role','status');shell.appendChild(notice);
+        rotateButton.addEventListener('click',async function(){
+            try {
+                if(!document.fullscreenElement)await shell.requestFullscreen();
+                if(active!==state)return;
+                await global.screen.orientation.lock(global.matchMedia('(orientation: portrait)').matches?'landscape':'portrait');
+                if(active!==state){global.screen.orientation.unlock();return;}state.orientationLocked=true;
+            }catch(e){notice.textContent=options.language==='en'?'Screen rotation is unavailable here. Rotate your device manually; the layout adapts automatically.':'Rotasi layar tidak tersedia di sini. Putar perangkat secara manual; tata letak menyesuaikan otomatis.';}
+        });
 
         var filter = document.createElement('select');
         filter.className = 'flippy-filter';
@@ -176,7 +201,7 @@ export function createReader(global, engine) {
         download.appendChild(makeIcon('download'));
         download.href = options.url || '#';
         if (!options.url) download.hidden = true;
-        download.setAttribute('download', ((options.title || 'ebook').replace(/\.(pdf|epub|cbz|djvu|djv)$/i, '').replace(/[\\/:*?"<>|]/g, '').trim().slice(0, 80) || 'ebook') + '.' + documentFormat);
+        download.setAttribute('download', ((options.title || 'ebook').replace(/\.(pdf|epub|cbz|djvu|djv|txt|md|html|fb2)$/i, '').replace(/[\\/:*?"<>|]/g, '').trim().slice(0, 80) || 'ebook') + '.' + documentFormat);
         var closeButton = button(t("Tutup pembaca"), 'library-reader-button library-reader-close', 'close');
         actions.appendChild(marksButton);
         actions.appendChild(soundButton);
@@ -211,6 +236,19 @@ export function createReader(global, engine) {
         sidebar.appendChild(thumbsList);
         content.appendChild(sidebar);
         shell.appendChild(content);
+        var toolsHost=document.createElement('aside');toolsHost.className='sela-tools';toolsHost.hidden=true;content.appendChild(toolsHost);
+        var toolsPromise;
+        function loadTools(){
+            if(!toolsPromise)toolsPromise=import(/* webpackIgnore: true */ /* @vite-ignore */ options.toolsUrl).then(function(module){
+                if(active!==state)throw new DOMException('Reader closed','AbortError');
+                state.getText=function(page){return module.pageText(state.book,page);};
+                state.tools=module.mountTools(state,toolsHost);return state.tools;
+            }).catch(function(error){toolsPromise=null;if(active===state)notice.textContent=error.message;throw error;});
+            return toolsPromise;
+        }
+        state.getText=function(page){return loadTools().then(function(){return state.getText(page);});};
+        state.showTools=function(){sidebar.hidden=true;marksButton.setAttribute('aria-expanded','false');toolsHost.hidden=false;toolsButton.setAttribute('aria-expanded','true');return loadTools();};
+        toolsButton.addEventListener('click',function(){if(toolsHost.hidden)state.showTools().catch(function(){});else{toolsHost.hidden=true;toolsButton.setAttribute('aria-expanded','false');state.tools?.stop();}});
 
         var footer = document.createElement('footer');
         footer.className = 'library-reader-footer';
@@ -270,6 +308,7 @@ export function createReader(global, engine) {
             bookmarkButton.replaceChildren(makeIcon(marked ? 'bookmarkOff' : 'bookmark'));
         }
 
+        state.updateMarks=updateMarks;
         function updatePage(page) {
             state.current = Math.max(1, Math.min(state.pages || 1, Number(page) || 1));
             pageInput.value = String(state.current);
@@ -323,7 +362,7 @@ export function createReader(global, engine) {
         function buildThumbs() {
             if (state.thumbsBuilt || !state.pages) return;
             state.thumbsBuilt = true;
-            if (options.format === 'epub') {
+            if (state.book.getText) {
                 for(var n=1;n<=state.pages;n++) (function(number){
                     var item=button('Chapter '+number,'library-reader-mark');
                     item.addEventListener('click',function(){state.book.goTo(number);});thumbsList.appendChild(item);
@@ -412,8 +451,9 @@ export function createReader(global, engine) {
         }
 
         state.onKey = function (event) {
+            if(!event.defaultPrevented&&(event.ctrlKey||event.metaKey)&&event.key.toLowerCase()==='f'&&state.book){event.preventDefault();state.showTools().then(function(){toolsHost.querySelector('input[type=search]').focus();}).catch(function(){});return;}
             if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
-            if (event.key === 'Escape') { event.preventDefault(); if(!help.hidden)toggleHelp();else close(); return; }
+            if (event.key === 'Escape') { event.preventDefault(); if(!help.hidden)toggleHelp();else if(!toolsHost.hidden){toolsHost.hidden=true;toolsButton.setAttribute('aria-expanded','false');state.tools?.stop();toolsButton.focus();}else close(); return; }
             if (!/^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName) && !event.target.isContentEditable && state.book) {
                 var book=state.book, rtl=options.mode==='manga'||options.readingDirection==='rtl';
                 var key=event.key;
@@ -434,6 +474,7 @@ export function createReader(global, engine) {
         closeButton.addEventListener('click', function () { close(); });
         overlay.addEventListener('click', function (event) { if (event.target === overlay) close(); });
         marksButton.addEventListener('click', function () {
+            toolsHost.hidden=true;toolsButton.setAttribute('aria-expanded','false');state.tools?.stop();
             sidebar.hidden = !sidebar.hidden;
             marksButton.setAttribute('aria-expanded', sidebar.hidden ? 'false' : 'true');
             if (!sidebar.hidden) buildThumbs();
@@ -469,6 +510,7 @@ export function createReader(global, engine) {
         bookHost.addEventListener('flipbook:ready', function (event) {
             if (active !== state) return;
             state.pages = event.detail.pages;
+            toolsButton.disabled=false;
             progress.max = String(state.pages);
             progress.disabled = false;
             pageInput.max = String(state.pages);
@@ -476,6 +518,7 @@ export function createReader(global, engine) {
             updatePage(state.book.currentPage());
             if (!sidebar.hidden) buildThumbs();
             if (document.activeElement === closeButton) bookHost.focus();
+            if(state.book.getText&&!options.startPage){var location=read(key+':location',null);if(location&&location.page===state.book.currentPage()&&Number.isFinite(location.ratio))state.book.container.scrollTop=Math.max(0,Math.min(1,location.ratio))*(state.book.container.scrollHeight-state.book.container.clientHeight);}
             if (options.onReady) options.onReady(state);
         });
         bookHost.addEventListener('flipbook:pagechange', function (event) {

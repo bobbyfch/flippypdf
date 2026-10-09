@@ -1,6 +1,6 @@
 {
-  "name": "flippypdf",
-  "version": "2.2.0",
+  "name": "@bobbyfch/sela",
+  "version": "3.0.0",
   "description": "Framework-independent PDF, EPUB and comic reader with lazy format adapters",
   "type": "module",
   "license": "MIT",
@@ -32,7 +32,8 @@
     "test": "node --test tests/unit/*.test.mjs",
     "test:browser": "playwright test",
     "test:types": "tsc -p tests/types/tsconfig.json",
-    "serve": "node scripts/serve.mjs"
+    "serve": "node scripts/serve.mjs",
+    "package:extension": "node scripts/package-extension.mjs"
   },
   "devDependencies": {
     "@playwright/test": "1.64.0",

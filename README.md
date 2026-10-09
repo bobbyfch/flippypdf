@@ -1,17 +1,17 @@
-<p align="center"><img src="logo.svg" width="88" alt="FlippyPDF green bird"></p>
-<h1 align="center">FlippyPDF</h1>
-<p align="center"><strong>Your stories. Your reading rhythm. 🌿</strong><br>PDF · EPUB · CBZ · optional DjVu<br>Book flip · Manga RTL · Seamless webtoon · Single page</p>
+<p align="center"><img src="logo.svg" width="88" alt="Sela open-book emblem"></p>
+<h1 align="center">Sela</h1>
+<p align="center"><strong>A place between. A story within. 📖</strong><br>PDF · EPUB · CBZ · TXT · Markdown · HTML · FB2 · optional DjVu<br>Book flip · Manga RTL · Seamless webtoon · Single page</p>
 <p align="center"><a href="https://github.com/bobbyfch/flippypdf/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/bobbyfch/flippypdf/actions/workflows/ci.yml/badge.svg"></a> <img alt="MIT" src="https://img.shields.io/badge/license-MIT-31725a"> <img alt="Release" src="https://img.shields.io/github/v/release/bobbyfch/flippypdf?color=31725a"> <img alt="TypeScript ready" src="https://img.shields.io/badge/TypeScript-ready-3178c6"> <img alt="Framework independent" src="https://img.shields.io/badge/framework-independent-31725a"></p>
 
 [Live playground](https://bobbyfch.github.io/flippypdf/) · [Bahasa Indonesia](README.id.md) · [Integrations](docs/integrations.md) · [Formats](docs/formats.md) · [Browser support](docs/compatibility.md) · [Changelog](CHANGELOG.md)
 
-A lightweight reading interface for your website. **No Bootstrap, jQuery or icon font required.** PDF.js loads only for PDFs; EPUB and CBZ use a separate lazy adapter. Optional DjVu integration uses an externally supplied decoder.
+**Sela** means an interval: a space between things, and a moment to make room for a story. Formerly **FlippyPDF**, it is a lightweight reading interface for your website. **No Bootstrap, jQuery or icon font required.** PDF.js loads only for PDFs; EPUB and CBZ use a separate lazy adapter. Optional DjVu integration uses an externally supplied decoder.
 
 🇮🇩 [Baca panduan lengkap dalam Bahasa Indonesia →](README.id.md)
 
-[![FlippyPDF live book reader](site/preview-reader.jpg)](https://bobbyfch.github.io/flippypdf/)
+[![Sela live book reader](site/preview-reader.jpg)](https://bobbyfch.github.io/flippypdf/)
 
-## ✨ Why Flippy?
+## ✨ Why Sela?
 
 | Read your way | Fit your project |
 | --- | --- |
@@ -29,9 +29,11 @@ A lightweight reading interface for your website. **No Bootstrap, jQuery or icon
 
 | Module | Gzip size | Loaded when |
 | --- | ---: | --- |
-| Main interface | ~21.4 KiB | Main script requested |
-| Scoped CSS | ~2.5 KiB | First open |
-| EPUB / CBZ adapter (includes fflate) | ~6.1 KiB | EPUB or CBZ selected |
+| Main interface | ~22.7 KiB | Main script requested |
+| Scoped CSS | ~2.9 KiB | First open |
+| EPUB / CBZ adapter (includes fflate) | ~6.8 KiB | EPUB or CBZ selected |
+| Reading tools: contents, search, notes, TTS | ~4.1 KiB | Tools first opened |
+| Plain text / Markdown / HTML / FB2 | ~2.5 KiB | Text format selected |
 | DjVu adapter | ~1.4 KiB | DjVu selected; external decoder also needed |
 | PDF.js + worker (modern) | ~491 KiB combined | PDF selected; fonts/CMaps may load separately |
 
@@ -41,20 +43,21 @@ The interface is lightweight; total download depends on the document and decoder
 
 | Document | Experience | Current scope |
 | --- | --- | --- |
-| PDF | Book · single · manga RTL · webtoon | Canvas pages, password option; no text layer, search or annotations yet |
-| EPUB | Selectable text · chapter reading · continuous chapters | Reflowable HTML, reader typography; no encrypted resources or publisher layout fidelity |
+| PDF | Book · single · manga RTL · webtoon | Canvas pages; embedded outline, optional search, selectable transcript, narration and page notes; no aligned PDF text layer or OCR |
+| EPUB | Selectable text · chapter reading · continuous chapters | Reflowable HTML, reader typography; navigation/NCX, anchor links; no encrypted resources or publisher layout fidelity |
 | CBZ | Comic pages in all four modes | Naturally sorted raster images supported by the browser |
+| TXT / MD / HTML / FB2 | Selectable reflowable text | UTF-8; basic Markdown headings/fences, safe HTML, text-only FB2; heading outline |
 | DjVu | Scanned pages in all four modes | Bundled single-file documents; separately supplied external decoder |
 
 ```js
-const reader = new Flippy({
+const reader = new Sela({
   url: '/books/story.epub', // EPUB / CBZ / DjVu inferred from URL extension
   language: 'en', mode: 'webtoon', theme: 'auto', pageGap: 0
 });
 await reader.open();
 ```
 
-Set `format: 'epub'`, `'cbz'` or `'djvu'` explicitly for Blob URLs, byte data and extensionless endpoints. DjVu also requires `djvujsSrc`; its GPL-2.0 decoder is not part of the MIT bundle. CBR/RAR, MOBI/AZW, DOCX and DRM are not supported. [Full format guide](docs/formats.md).
+Set `format: 'epub'`, `'cbz'` or `'djvu'` explicitly for Blob URLs, byte data and extensionless endpoints. DjVu also requires `djvujsSrc`; its GPL-2.0 decoder is not part of the MIT bundle. CBR/RAR, MOBI/AZW, DOCX and DRM are not supported in this release. [Full format guide](docs/formats.md).
 
 ## 🎛️ Read, tweak, repeat
 
@@ -72,13 +75,33 @@ Shortcuts ignore editable fields. Reduced motion overrides fold duration. The pl
 
 Set `language: 'en'` for English reader controls or `'id'` for Indonesian (the default retained for existing integrations). The Pages topbar selects the demo language.
 
+## 🎧 Listen, find, keep
+
+Open **Reading tools** in the reader header, or call `await reader.showTools()`. Embedded PDF bookmarks resolve to their page; EPUB navigation/NCX opens chapters and anchors. Search scans pages sequentially, can be cancelled, and caps results at 100 matching pages. `await reader.getText(page)` returns extractable text. Scans and image comics need external OCR before narration/search can work.
+
+**TTS uses the Web Speech API:** no Sela API key, paid SDK, server or model download. Local voices are selected by default; enable online voices explicitly if desired. Voices/languages come from the browser/OS. Remote voices may send narration text to their provider; local voice availability, audible quality, pause/resume and background playback vary. No guaranteed free third-party voice service or Indonesian voice is promised. Speech is chunked, user-started and cancelled on manual navigation or close. Optional continuous narration advances pages/chapters.
+
+Write page/chapter notes; export/import a versioned JSON file with notes and personal bookmarks. Import merges the current book's notes by page/chapter number: use the same document edition. Notes are not geometric PDF highlights. EPUB chapter and relative scroll position resume on reopen; stable EPUB CFI locations are future work.
+
+## 🗄️ A shelf, when you want one
+
+The public demo's **bookshelf** saves selected documents in IndexedDB on that browser. Save a book, then **Prepare offline reader** while online: the optional download includes PDF engines, fonts/CMaps and demo assets. After preparation, reopen the app and read saved books without a connection. This is separate from the embedding core. Browser storage can be evicted or cleared: retain your original files. Local voices work offline when the OS supplies them; the external DjVu decoder is not offline-bundled.
+
+`npm run package:extension` builds standalone Chromium (Chrome/Edge/Brave) and Firefox extension ZIPs in `.git/sela-extension/`. Clicking the extension opens a local shelf with bundled readers. No host permissions, remote scripts or automatic PDF interception. These are development packages, **not store-published extensions**. [Offline & extension setup](docs/offline-extension.md).
+
+## 🌿 Sela, with the same roots
+
+`window.Sela` and `window.Flippy` refer to the same constructor. Named ESM/type exports include `Sela`/`SelaOptions` as well as legacy `Flippy`/`FlippyOptions`. New `sela.*` entry files coexist with `flippy.*`. The repository and Pages URLs remain `flippypdf` to protect existing integration/CDN paths; historical tags are unchanged. The package name for v3 is `@bobbyfch/sela` (install from GitHub; npm registry publication is still pending).
+
+Pages uses a first-visit IP country lookup through [country.is](https://country.is/): Indonesia defaults to Indonesian, other countries to English. Saved manual choice wins; a 2.5-second failure falls back to browser language. `?geo=off` disables the lookup. No document, precise device location or browser history is sent. The embed library makes no IP lookup; use `language: 'auto'` for browser language or supply `en`/`id` from your host.
+
 ## Quick start
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.2.0/dist/js/flippy.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v3.0.0/dist/js/sela.min.js"></script>
 <button id="read" type="button">Read PDF</button>
 <script>
-const reader = new Flippy({
+const reader = new Sela({
   pdfUrl: '/books/story.pdf', title: 'My story',
   mode: 'book', // book | single | webtoon | manga
   theme: 'auto', language: 'en', soundEnabled: false
@@ -92,7 +115,7 @@ document.querySelector('#read').addEventListener('click', () => {
 CSS loads automatically on first open. For explicit loading/CSP:
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.2.0/dist/css/flippy.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v3.0.0/dist/css/flippy.min.css">
 ```
 
 Pin releases in production. Existing root JS/CSS/sound paths remain; historical tags are never rewritten. Unused snapshots were removed from the current branch. [v1 migration](docs/release-v2.md).
@@ -100,12 +123,12 @@ Pin releases in production. Existing root JS/CSS/sound paths remain; historical 
 ### ESM / TypeScript
 
 ```sh
-npm install github:bobbyfch/flippypdf#v2.2.0
+npm install github:bobbyfch/flippypdf#v3.0.0
 ```
 
 ```ts
-import Flippy from 'flippypdf';
-const reader = new Flippy({ pdfUrl: '/story.pdf', mode: 'manga', filter: 'grayscale' });
+import Sela from '@bobbyfch/sela';
+const reader = new Sela({ pdfUrl: '/story.pdf', mode: 'manga', filter: 'grayscale' });
 await reader.open();
 reader.next().setFilter('sepia');
 reader.addEventListener('pagechange', event => console.log(event.detail.page));
@@ -116,13 +139,13 @@ Bundled imports use the pinned CDN for renderer assets. Self-hosting/offline: se
 
 ### Older browsers
 
-Use `dist/js/flippy.compat.js` instead of the main script. This ES5 entry checks capabilities before loading the modern viewer:
+Use `dist/js/sela.compat.js` instead of the main script. This ES5 entry checks capabilities before loading the modern viewer:
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.2.0/dist/js/flippy.compat.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v3.0.0/dist/js/sela.compat.js"></script>
 <script>
 document.getElementById('read').onclick = function () {
-  var start = function () { new Flippy({ pdfUrl: '/story.pdf' }).open(); };
+  var start = function () { new Sela({ pdfUrl: '/story.pdf' }).open(); };
   if (window.FlippyReady) FlippyReady.then(start).catch(function () {
     window.location.assign('/story.pdf');
   }); else start();
@@ -144,7 +167,7 @@ Events: `ready`, `pagechange`, `pageerror`, `close`, `error`; payloads are in `e
 
 ## Privacy & accessibility
 
-Selected demo documents stay in the browser; no upload or analytics. Bookmarks/progress use localStorage when available. CDN requests follow normal browser networking. Keyboard controls, focus trapping, labelled actions and reduced motion are included. PDFs render to canvases; provide an accessible original or alternative content for screen-reader users. EPUB scripts and external resources are removed. Physical Safari/iOS and Firefox testing remains outstanding; no full WCAG conformance claim is made.
+Selected demo documents stay in the browser; no upload or analytics. Bookmarks/progress use localStorage when available. CDN requests follow normal browser networking. Keyboard controls, focus trapping, labelled actions and reduced motion are included. PDFs render to canvases; optional tools provide a selectable text transcript, but this is not an aligned text layer or full tagged-PDF accessibility. Provide an accessible original for screen-reader users. EPUB scripts and external resources are removed. Physical Safari/iOS and mobile device testing remains outstanding; no full WCAG conformance claim is made.
 
 ## Development
 
@@ -163,10 +186,10 @@ The browser suite covers PDF/EPUB/CBZ/DjVu, real pixels, layouts, RTL, filters, 
 
 [Research & prioritized roadmap](docs/roadmap.md) · [Contributing](CONTRIBUTING.md)
 
-The proposed direction is **one reading interface, optional capabilities, many stacks**: search and accessible text first, richer EPUB navigation, then comic panel focus and portable annotations. These are roadmap ideas, not released features. Npm-registry distribution is also planned; today's installation uses CDN, GitHub or self-hosted assets.
+The direction is **one reading interface, optional capabilities, many stacks**. This release implements search/transcripts, document contents, browser narration, page notes and a local shelf. Aligned PDF text layers/highlights, EPUB CFI pagination, MOBI/AZW3, OPDS and synchronization remain roadmap work. Feature parity or performance superiority over Readest/foliate-js is not claimed. Npm-registry distribution is also planned; today's installation uses CDN, GitHub or self-hosted assets.
 
 ## Open source 🌱
 
 MIT © Bobby Fajar Christian. Engine adapted from [PDFlipbook](https://github.com/SympleNZ/PDFlipbook) (MIT), PDF renderer [PDF.js](https://github.com/mozilla/pdf.js) (Apache-2.0), ZIP adapter fflate (MIT). External DjVu.js decoder is GPL-2.0 and is not bundled. [Third-party notices](THIRD_PARTY_NOTICES.md).
 
-If Flippy makes your project easier to read, a ⭐ helps others find it. Bug reports are welcome: include a reproducible PDF, browser version, mode and console error.
+If Sela makes your project easier to read, a ⭐ helps others find it. Bug reports are welcome: include a reproducible PDF, browser version, mode and console error.
