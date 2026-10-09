@@ -7,7 +7,7 @@ The interactive reader requires ES2020, dynamic modules, module workers, Pointer
 | Current Edge / Windows | Interactive viewer | Local browser suite |
 | Chromium / Linux | Interactive viewer | GitHub Actions suite |
 | Playwright WebKit / Windows | Interactive viewer, formats and offline shelf | 35 browser scenarios passed; this is not physical Safari/iOS verification |
-| Current Firefox | Intended support with matching APIs | Local test runtime failed to launch (Windows SideBySide/mozglue assembly); Linux CI remains the verification gate |
+| Playwright Firefox / Linux | Interactive viewer, formats and offline shelf | Linux CI passed; Windows test runtime failed to launch (SideBySide/mozglue assembly) |
 | Android / iOS | Responsive modes and fullscreen fallback | Mobile viewport emulation, not physical devices |
 | Missing required capabilities, including IE | Original HTTP(S) PDF via compat entry | Capability removal tested in Chromium |
 | JavaScript disabled / blocked | Normal PDF link | Demo includes noscript |
@@ -18,7 +18,7 @@ Always retain a direct PDF link. CSP must allow scripts/styles and module worker
 
 EPUB additionally needs Shadow DOM and TextDecoder, CBZ needs image decoding, and optional DjVu needs createImageBitmap plus the external decoder's blob worker. The old-browser fallback applies to PDF; EPUB/CBZ/DjVu need a capable browser or an alternative server conversion. Touch pinch is covered by synthetic pointer tests; physical mobile gesture behavior remains unverified. See [format scope](formats.md).
 
-Sela 3.0 validation: all 70 Chromium/WebKit scenarios passed, including real PDF/EPUB outlines, search, notes import/export, safe text formats, portrait/landscape transitions and a saved PDF reopened after network disconnection. The packaged Chromium extension was also tested in an actual temporary Edge extension context. Firefox extension signing/store review and physical devices remain unverified.
+Sela 3.0 validation: all 105 Chromium/Firefox/WebKit scenarios passed on Linux CI, and all 70 Chromium/WebKit scenarios passed on Windows, including real PDF/EPUB outlines, search, notes import/export, safe text formats, portrait/landscape transitions and a saved PDF reopened after network disconnection. The packaged Chromium extension was also tested in an actual temporary Edge extension context. Firefox extension signing/store review and physical devices remain unverified.
 
 TTS uses optional Web Speech and defaults to voices reporting `localService`. Voice availability and language quality depend on the browser and installed OS voices; local testing found English voices but no Indonesian local voice. No paid service or API key is required. Browsers without speech support keep the transcript available. Screen orientation locking requires browser/OS support and may require fullscreen; denial leaves ordinary responsive reading available.
 

@@ -15,6 +15,8 @@ Local OS/browser voices may narrate offline; the app cannot install or guarantee
 
 ## Development extensions
 
+Prebuilt development ZIPs: [Chromium / Chrome / Edge / Brave](https://github.com/bobbyfch/flippypdf/releases/download/v3.0.0/sela-chromium-3.0.0.zip) · [Firefox](https://github.com/bobbyfch/flippypdf/releases/download/v3.0.0/sela-firefox-3.0.0.zip). Extract the appropriate ZIP, then follow the browser-specific instructions below. These packages are unsigned; Firefox uses temporary loading until signing/store distribution is completed.
+
 ```sh
 npm ci
 npm run build

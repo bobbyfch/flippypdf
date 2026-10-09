@@ -180,7 +180,7 @@ npm run test:browser
 npm run serve
 ```
 
-The browser suite covers PDF/EPUB/CBZ/DjVu, real pixels, layouts, RTL, filters, Vue lifecycle, flag/theme controls, mobile settings, archive errors, cancellation and auth headers. CI uses Chromium; local checks use Edge. Platform lists do not imply testing every OS/version.
+The browser suite covers PDF/EPUB/CBZ/DjVu, real pixels, layouts, RTL, filters, Vue lifecycle, flag/theme controls, mobile settings, archive errors, cancellation and auth headers. CI checks Chromium, Firefox and WebKit; local checks also use Edge. Sela 3.0 passed all 105 Linux browser scenarios and 70 Windows Chromium/WebKit scenarios. Platform lists do not imply testing every OS/version or physical devices.
 
 ## 🌱 What's next?
 
