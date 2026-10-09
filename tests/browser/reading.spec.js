@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { readFile } from 'node:fs/promises';
 
 test('manga arrows, left navigation and filters preserve PDF pixels', async ({ page }) => {
   await page.goto('/');
@@ -70,6 +71,14 @@ test('compatibility entry avoids modern bundle on missing browser capabilities',
   expect(modern).toEqual([]);
   await expect(page.locator('a[href="example/limarayamusic.pdf"]').first()).toBeVisible();
   await expect(page.locator('[data-mode]')).toHaveCount(4);
+  await page.route('**/example/limarayamusic.pdf', async route => route.fulfill({
+    contentType: 'application/pdf',
+    headers: { 'Content-Disposition': 'attachment; filename="limaraya.pdf"' },
+    body: await readFile('example/limarayamusic.pdf')
+  }));
+  const downloaded = page.waitForEvent('download');
+  await page.locator('[data-mode=book]').click();
+  expect((await downloaded).suggestedFilename()).toBe('limaraya.pdf');
 });
 
 test('web component destroys viewer on disconnect and reconnects once', async ({ page }) => {
