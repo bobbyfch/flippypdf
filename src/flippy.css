@@ -188,7 +188,7 @@
 .library-reader-close:hover { color:#fff; }
 .library-reader-header, .library-reader-footer { margin:0; width:100%; max-width:none; flex-direction:row; justify-content:flex-start; }
 .flippy-webtoon { overflow:auto; overscroll-behavior:contain; padding:20px; background:var(--flippy-bg); --flippy-page-width:760px; }
-.flippy-webtoon-page { width:min(var(--flippy-page-width),100%); margin:0 auto 16px; background:#fff; scroll-margin-top:12px; }
+.flippy-webtoon-page { width:var(--flippy-page-width);max-width:var(--flippy-page-max,100%); margin:0 auto var(--flippy-page-gap,0px); background:#fff; scroll-margin-top:12px; }
 .flippy-webtoon-page canvas { display:block; width:100%; height:100%; }
 .flippy-webtoon-tools { position:sticky; top:0; z-index:4; display:flex; justify-content:flex-end; gap:8px; margin-bottom:12px; pointer-events:none; }
 .flippy-webtoon-tools button { pointer-events:auto; }
@@ -203,3 +203,9 @@
 @media(max-width:480px){.flippy-filter{max-width:85px;font-size:10px;padding:5px}.library-reader-actions{gap:3px}}
 
 .fb-rtl .fb-nav svg{transform:rotate(180deg)}
+
+.flippy-shortcuts{padding:14px 22px;background:var(--flippy-panel);font-size:12px;color:var(--flippy-fg);line-height:1.8;border-bottom:1px solid var(--flippy-border)}
+.flippy-epub{overflow:auto;padding:28px;overscroll-behavior:contain;background:var(--flippy-bg);touch-action:pan-y}
+.flippy-epub-chapter{max-width:740px;margin:0 auto 36px;filter:var(--flippy-page-filter,none)}
+.flippy-epub-chapter[hidden]{display:none}
+.library-reader-overlay[data-paper=true] .fb-face::after{content:'';position:absolute;inset:0;pointer-events:none;background-image:repeating-linear-gradient(17deg,#785e3a05 0 1px,transparent 1px 4px),repeating-linear-gradient(107deg,#7d633006 0 1px,transparent 1px 5px);mix-blend-mode:multiply}

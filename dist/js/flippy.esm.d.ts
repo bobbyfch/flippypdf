@@ -4,7 +4,14 @@ export interface FlippyOptions {
   url?: string;
   data?: ArrayBuffer | Uint8Array;
   title?: string;
+  language?: 'en' | 'id';
   mode?: FlippyMode;
+  format?: 'auto' | 'pdf' | 'epub' | 'cbz' | 'djvu';
+  djvujsSrc?: string;
+  djvuIntegrity?: string;
+  pageGap?: number;
+  wheelZoom?: boolean;
+  paperTexture?: boolean;
   theme?: 'auto' | 'light' | 'dark';
   filter?: 'none' | 'grayscale' | 'sepia' | 'contrast' | 'warm' | 'cool';
   readingDirection?: 'ltr' | 'rtl';
@@ -52,6 +59,7 @@ export declare class Flippy extends EventTarget {
   options: FlippyOptions;
   readonly overlay: HTMLElement | null;
   readonly totalPages: number;
+  readonly zoom: number;
   open(): Promise<this>;
   close(): void;
   destroy(): void;

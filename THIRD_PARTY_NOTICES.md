@@ -17,3 +17,13 @@ project does not claim to implement a new PDF parser.
 
 The page-turn audio is from the original MIT-licensed FlippyPDF distribution.
 Flippy includes inline SVG icons rather than third-party icon fonts.
+
+The optional EPUB/CBZ adapter includes fflate 0.8.3 (MIT), Copyright Arjun
+Barrett. Its full license is preserved in `dist/fflate-LICENSE.txt`.
+
+The optional DjVu adapter integrates separately supplied DjVu.js, by
+RussCoder, GPL-2.0 licensed: https://github.com/RussCoder/djvujs . The decoder
+is not bundled in this repository or release. The demo loads the official
+external decoder with SRI only when requested. The adapter does not change
+the upstream decoder's license. The small Green valley sample is an original
+generated landscape, encoded using DjVu.js.

@@ -3,7 +3,7 @@ import { createBookEngine } from './book-engine.js';
 import { createReader } from './reader.js';
 import { Webtoon } from './webtoon.js';
 
-export const VERSION = '2.1.0';
+export const VERSION = '2.2.0';
 export const FILTERS = { none: 'none', grayscale: 'grayscale(1)', sepia: 'sepia(.7)', contrast: 'grayscale(1) contrast(1.4)', warm: 'sepia(.35) saturate(.8)', cool: 'hue-rotate(180deg) saturate(.65)' };
 const cssLoads = new Map();
 const bookEngines = new WeakMap();
@@ -39,6 +39,7 @@ export function createFlippyClass(defaultAssetBase) {
       if (this.options.filter && !Object.prototype.hasOwnProperty.call(FILTERS, this.options.filter)) throw new TypeError('Unknown reading filter');
       if (this.options.readingDirection && !['ltr', 'rtl'].includes(this.options.readingDirection)) throw new TypeError('readingDirection must be ltr or rtl');
       if (!['auto', 'light', 'dark'].includes(this.options.theme)) throw new TypeError('theme must be auto, light or dark');
+      if (options.format && !['auto','pdf','epub','cbz','djvu'].includes(options.format)) throw new TypeError('Unsupported document format');
       this._generation = 0;
       this._pending = null;
       this._reader = null;
@@ -59,6 +60,9 @@ export function createFlippyClass(defaultAssetBase) {
       const win = window;
       this._reader?.close(true);
       const options = { ...this.options };
+      const extension = /\.(epub|cbz|djvu|djv)(?:[?#]|$)/i.exec(options.url || options.pdfUrl || '')?.[1].toLowerCase();
+      options.format = options.format && options.format !== 'auto' ? options.format : (extension === 'djv' ? 'djvu' : extension || 'pdf');
+      options.pageGap = Math.max(0, Math.min(80, Number(options.pageGap)||0));
       options.maxScale = Math.max(.5, Math.min(3, Number(options.maxScale || options.scale) || 1.75));
       options.maxCanvasPixels = Math.max(250000, Math.min(8000000, Number(options.maxCanvasPixels) || 2500000));
       if (options.duration !== undefined) options.duration = Math.max(0, Math.min(1500, Number(options.duration) || 0));
@@ -75,12 +79,19 @@ export function createFlippyClass(defaultAssetBase) {
       try {
         const [, lib] = await Promise.all([
           options.autoStyles === false ? Promise.resolve() : loadCss(safeUrl(options.cssUrl || new URL('css/flippy.min.css', base), win.location.href), win.document),
-          loadPdfEngine(options, base, win)
+          options.format === 'pdf' ? loadPdfEngine(options, base, win) :
+            import(/* webpackIgnore: true */ /* @vite-ignore */ new URL(options.format === 'djvu' ? 'js/flippy.djvu.js' : 'js/flippy.archive.js', base).href).then(async module => {
+              if(options.format === 'epub')return { epub: module.Epub };
+              if(options.format === 'cbz')return module.cbzLibrary();
+              if(!options.djvujsSrc)throw new Error('DjVu requires a separately supplied djvujsSrc decoder');
+              options.djvujsSrc = safeUrl(options.djvujsSrc, win.location.href);
+              return module.loadDjvu(options);
+            })
         ]);
         if (generation !== this._generation) throw abortError();
         options.pdfjsLib = lib;
         if (!bookEngines.has(win)) bookEngines.set(win, createBookEngine(win));
-        const engine = options.mode === 'webtoon' ? { create: (el, opts) => new Webtoon(el, opts) } : bookEngines.get(win);
+        const engine = lib.epub ? {create:(el,opts)=>new lib.epub(el,opts)} : options.mode === 'webtoon' ? { create: (el, opts) => new Webtoon(el, opts) } : bookEngines.get(win);
         this._reader = createReader(win, engine);
         return await new Promise((resolve, reject) => {
           this._rejectReady = reject;
@@ -128,6 +139,7 @@ export function createFlippyClass(defaultAssetBase) {
     zoomIn() { this.book?.zoomIn(); return this; }
     zoomOut() { this.book?.zoomOut(); return this; }
     setZoom(value) { this.book?.setZoom(value); return this; }
+    get zoom() { return this.book?.zoom || 1; }
     toggleFullscreen() { this.book?.toggleFullscreen(); return this; }
     setFilter(value) {
       if (!Object.prototype.hasOwnProperty.call(FILTERS, value)) throw new TypeError('Unknown reading filter');

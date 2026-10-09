@@ -5,7 +5,7 @@ var status = document.querySelector('#status');
 var theme = document.querySelector('#theme');
 var language = document.querySelector('#language');
 var translations = {
-eyebrow:'SEDIKIT SETUP. BANYAK CERITA.',headline:'PDF milikmu.<br>Ritme bacamu.',intro:'Balik halaman. Ikuti cerita. Temukan fokus.<br>Reader hijau kecil yang menyatu dengan aplikasimu.',try:'Coba pembacanya ↓',original:'CERITA PENDEK BERILUSTRASI ORISINAL',storySub:'Rumah untuk cerita yang belum selesai',demoEyebrow:'NYAMANKAN DIRIMU',demoHeading:'Empat jalan menuju cerita.',lazy:'Mesin PDF dimuat hanya saat membaca.',bookTitle:'Balik halamannya.',bookText:'Lipatan kertas, bayangan lembut, dan dua halaman seperti buku.',webtoonTitle:'Ikuti ceritanya.',webtoonText:'Baca vertikal. Halaman terdekat dirender saat kamu menggulir.',singleTitle:'Satu halaman dulu.',singleText:'Satu halaman, lebih fokus. Nyaman juga di layar kecil.',mangaTitle:'Mulai dari kanan.',mangaText:'Balik halaman dan tombol panah kanan ke kiri. Urutan PDF tetap.',read:'Mulai membaca ↗',upload:'Atau coba PDF milikmu',privacy:'File tetap di browsermu. Tanpa upload, akun, atau pelacakan.',download:'Unduh cerita Limaraya 8 halaman ↗',installTitle:'Menyatu dengan stack kamu.',installText:'CI3, Laravel, Vue, React, Svelte, Astro, atau HTML biasa. Bootstrap dan Tailwind boleh dipakai, keduanya tidak wajib.',docs:'Panduan pemasangan & integrasi ↗',filtersTitle:'Ruang baca lebih nyaman',filtersText:'Warna asli, hitam putih, sepia, kontras tinggi, serta warna hangat dan dingin. Warna netral bisa membantu saat warna sulit dibedakan; kebutuhan tiap orang berbeda.',compatTitle:'Tetap ada jalan membaca',compatText:'Browser modern mendapat viewer lengkap. Browser lama membuka PDF asli melalui compatibility entry. Dukungan Windows, macOS, Linux, Android, dan iOS mengikuti kemampuan browser.',openTitle:'Open source, asal jelas',openText:'Reader MIT, mesin halaman PDFlipbook, dan PDF.js Apache-2.0 yang dimuat saat dibutuhkan. Navigasi keyboard, progres tersimpan, dan bookmark tersedia.',themeLabel:'Tampilan'};
+eyebrow:'SEDIKIT SETUP. BANYAK CERITA.',headline:'PDF milikmu.<br>Ritme bacamu.',intro:'Balik halaman. Ikuti cerita. Temukan fokus.<br>Reader hijau kecil yang menyatu dengan aplikasimu.',try:'Coba pembacanya ↓',original:'CERITA PENDEK BERILUSTRASI ORISINAL',storySub:'Rumah untuk cerita yang belum selesai',demoEyebrow:'NYAMANKAN DIRIMU',demoHeading:'Empat jalan menuju cerita.',lazy:'Mesin PDF dimuat hanya saat membaca.',bookTitle:'Balik halamannya.',bookText:'Lipatan kertas, bayangan lembut, dan dua halaman seperti buku.',webtoonTitle:'Ikuti ceritanya.',webtoonText:'Baca vertikal. Halaman terdekat dirender saat kamu menggulir.',singleTitle:'Satu halaman dulu.',singleText:'Satu halaman, lebih fokus. Nyaman juga di layar kecil.',mangaTitle:'Mulai dari kanan.',mangaText:'Balik halaman dan tombol panah kanan ke kiri. Urutan PDF tetap.',read:'Mulai membaca ↗',upload:'Cerita berikutnya dimulai di sini.',privacy:'File tetap di browsermu. Tanpa upload, akun, atau pelacakan.',download:'Unduh PDF Limaraya ↗',dropHint:'Tarik PDF, EPUB, CBZ, atau DjVu ke sini — atau pilih file.',browse:'Pilih file ↗',clear:'Hapus pilihan',playEyebrow:'ATUR SESUKAMU',playTitle:'Laboratorium baca kecil.',launch:'Buka reader ↗',documentLabel:'Dokumen',modeLabel:'Mode baca',filterLabel:'Filter baca',gapLabel:'Jarak halaman vertikal',motionLabel:'Durasi lipatan',zoomLabel:'Zoom / ukuran teks',paperLabel:'Tekstur kertas',wheelLabel:'Zoom dengan roda mouse biasa',soundLabel:'Suara halaman',playNote:'Ctrl + roda mouse atau pinch trackpad untuk zoom. Gulir biasa tetap nyaman. Tekan ? di reader untuk shortcut. EPUB memakai navigasi bab.',formatNote:'EPUB: teks mengalir tanpa DRM. CBZ: gambar raster. DjVu: decoder GPL-2.0 eksternal, hanya dimuat saat diminta.',installTitle:'Menyatu dengan stack kamu.',installText:'CI3, Laravel, Vue, React, Svelte, Astro, atau HTML biasa. Bootstrap dan Tailwind boleh dipakai, keduanya tidak wajib.',docs:'Panduan pemasangan & integrasi ↗',filtersTitle:'Ruang baca lebih nyaman',filtersText:'Warna asli, hitam putih, sepia, kontras tinggi, serta warna hangat dan dingin. Warna netral bisa membantu saat warna sulit dibedakan; kebutuhan tiap orang berbeda.',compatTitle:'Tetap ada jalan membaca',compatText:'Browser modern mendapat viewer lengkap. Browser lama membuka PDF asli melalui compatibility entry. Dukungan Windows, macOS, Linux, Android, dan iOS mengikuti kemampuan browser.',openTitle:'Open source, asal jelas',openText:'Reader MIT, mesin halaman PDFlipbook, dan PDF.js Apache-2.0 yang dimuat saat dibutuhkan. Navigasi keyboard, progres tersimpan, dan bookmark tersedia.',themeLabel:'Tampilan'};
 var nodes = document.querySelectorAll('[data-i18n]');
 var original = [];
 for (var i=0;i<nodes.length;i++) original.push(nodes[i].innerHTML);
@@ -14,30 +14,64 @@ function read(key,fallback){try{return localStorage.getItem('flippy-site:'+key)|
 function localize(){
  var id=language.value==='id';document.documentElement.lang=id?'id':'en';
  for(var i=0;i<nodes.length;i++) nodes[i].innerHTML=id?(translations[nodes[i].getAttribute('data-i18n')]||original[i]):original[i];
- theme.options[0].text=id?'Sistem':'System';theme.options[1].text=id?'Terang':'Light';theme.options[2].text=id?'Gelap':'Dark';theme.setAttribute('aria-label',id?'Tampilan':'Appearance');
+ Array.prototype.forEach.call(document.querySelectorAll('[data-theme-choice]'),function(button){var names=id?{auto:'Tema sistem',light:'Tema terang',dark:'Tema gelap'}:{auto:'System theme',light:'Light theme',dark:'Dark theme'};button.setAttribute('aria-label',names[button.dataset.themeChoice]);button.title=names[button.dataset.themeChoice];});
  save('language',language.value);
 }
-function applyTheme(){document.documentElement.setAttribute('data-theme',theme.value);save('theme',theme.value);if(viewer&&viewer.overlay)viewer.overlay.setAttribute('data-flippy-theme',theme.value);}
+function applyTheme(){document.documentElement.setAttribute('data-theme',theme.value);save('theme',theme.value);Array.prototype.forEach.call(document.querySelectorAll('[data-theme-choice]'),function(button){button.setAttribute('aria-pressed',String(button.dataset.themeChoice===theme.value));});if(viewer&&viewer.overlay)viewer.overlay.setAttribute('data-flippy-theme',theme.value);}
 theme.value=/^(auto|light|dark)$/.test(read('theme','auto'))?read('theme','auto'):'auto';
 language.value=read('language','en')==='id'?'id':'en';localize();applyTheme();
-theme.addEventListener('change',applyTheme);language.addEventListener('change',localize);
-document.querySelector('#pdf-file').addEventListener('change',function(event){
- if(viewer)viewer.close();if(selectedUrl)URL.revokeObjectURL(selectedUrl);
- var file=event.target.files[0];selectedUrl=file?URL.createObjectURL(file):null;
- status.textContent=file?file.name:'';
-});
-if(!window.URL||!URL.createObjectURL)document.querySelector('#pdf-file').disabled=true;
-var buttons=document.querySelectorAll('[data-mode]');
-function open(button){
- if(viewer)viewer.close();
- if(window.Flippy&&Flippy.supported===false){window.location.assign(selectedUrl||'example/limarayamusic.pdf');return;}
- var run=function(){
-  viewer=new Flippy({pdfUrl:selectedUrl||'example/limarayamusic.pdf',title:selectedUrl?document.querySelector('#pdf-file').files[0].name:'Limaraya · Rumah untuk cerita yang belum selesai',mode:button.getAttribute('data-mode'),theme:theme.value,trigger:button,soundEnabled:false,onPageError:function(){status.textContent=language.value==='id'?'Halaman gagal dirender. Coba halaman lain.':'A page could not render. Try another page.';}});
-  status.textContent=language.value==='id'?'Memuat reader…':'Loading reader…';
-  viewer.open().then(function(){status.textContent=viewer.totalPages+' '+(language.value==='id'?'halaman':'pages')+' · '+button.getAttribute('data-mode');}).catch(function(error){if(error.name!=='AbortError')status.textContent=error.message;});
- };
- if(window.FlippyReady)window.FlippyReady.then(run).catch(function(error){status.textContent=error.message;});else run();
+Array.prototype.forEach.call(document.querySelectorAll('[data-theme-choice]'),function(button){button.addEventListener('click',function(){theme.value=button.dataset.themeChoice;applyTheme();});});theme.addEventListener('change',applyTheme);language.addEventListener('change',localize);
+var selectedFile, generation=0;
+var input=document.querySelector('#pdf-file'),drop=document.querySelector('#drop-zone');
+var settings=document.querySelector('#playground');
+var samples={pdf:'example/limarayamusic.pdf',epub:'example/limaraya.epub',cbz:'example/limaraya.cbz',djvu:'example/green-valley.djvu'};
+function options(){return {mode:document.querySelector('#demo-mode').value,filter:document.querySelector('#demo-filter').value,pageGap:+document.querySelector('#demo-gap').value,duration:+document.querySelector('#demo-duration').value,paperTexture:document.querySelector('#demo-paper').checked,wheelZoom:document.querySelector('#demo-wheel').checked,soundEnabled:document.querySelector('#demo-sound').checked};}
+function showCode(){document.querySelector('#config-code').textContent='new Flippy('+JSON.stringify(options(),null,2)+');';}
+function selectFile(file){
+ if(file&&(!/\.(pdf|epub|cbz|djvu|djv)$/i.test(file.name)||file.size>64*1024*1024)){status.textContent=language.value==='id'?'Pilih format yang didukung, maksimal 64 MiB.':'Choose a supported document up to 64 MiB.';return;}
+ if(viewer)viewer.close();if(selectedUrl)URL.revokeObjectURL(selectedUrl);selectedFile=file;selectedUrl=file?URL.createObjectURL(file):null;
+ document.querySelector('.file-selection').hidden=!file;document.querySelector('#file-name').textContent=file?file.name+' · '+(file.size/1024/1024).toFixed(2)+' MiB':'';
+ status.textContent='';showCode();
 }
-for(var j=0;j<buttons.length;j++)(function(button){button.addEventListener('click',function(){open(button);});})(buttons[j]);
+input.addEventListener('change',function(){selectFile(input.files[0]);});
+document.querySelector('#clear-file').addEventListener('click',function(){input.value='';selectFile(null);});
+if(!window.URL||!URL.createObjectURL)input.disabled=true;
+['dragenter','dragover'].forEach(function(name){drop.addEventListener(name,function(e){e.preventDefault();drop.classList.add('is-dragging');});});
+['dragleave','drop'].forEach(function(name){drop.addEventListener(name,function(e){e.preventDefault();drop.classList.remove('is-dragging');if(name==='drop'&&window.URL&&URL.createObjectURL)selectFile(e.dataTransfer.files[0]);});});
+function attachSettings(current){
+ var details=document.createElement('details');details.className='flippy-demo-settings';
+ var summary=document.createElement('summary');summary.setAttribute('aria-label',language.value==='id'?'Pengaturan demo':'Demo settings');summary.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 17h16"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="17" r="3"/></svg>';
+ details.appendChild(summary);var panel=document.createElement('div');panel.className='flippy-demo-panel';
+ var controls=document.querySelector('.play-controls').cloneNode(true),toggles=document.querySelector('.play-toggles').cloneNode(true);
+ [controls,toggles].forEach(function(group){group.querySelectorAll('input,select').forEach(function(control){var original=document.getElementById(control.id);control.removeAttribute('id');control.value=original.value;control.checked=original.checked;
+ control.addEventListener('change',function(){original.value=control.value;original.checked=control.checked;original.dispatchEvent(new Event('change',{bubbles:true}));});});panel.appendChild(group);});
+ details.appendChild(panel);current.overlay.querySelector('.library-reader-actions').prepend(details);
+}
+function applySettings(event){
+ showCode();if(!viewer||!viewer.overlay)return;var id=event.target.id;
+ if(id==='sample'||id==='demo-mode'){var page=viewer.currentPage();if(id==='sample'){input.value='';selectFile(null);page=1;}open(document.querySelector('.launch-reader'),id==='sample',page);return;}
+ var config=options();viewer.setFilter(config.filter);viewer.setZoom(+document.querySelector('#demo-zoom').value);
+ viewer.overlay.dataset.paper=String(config.paperTexture);viewer.book.opts.wheelZoom=config.wheelZoom;viewer.book.opts.duration=matchMedia('(prefers-reduced-motion:reduce)').matches?0:config.duration;
+ viewer.book.container.style.setProperty('--flippy-page-gap',config.pageGap+'px');
+ if(id==='demo-sound'){var buttons=viewer.overlay.querySelectorAll('button');for(var i=0;i<buttons.length;i++){if(/suara|sound/i.test(buttons[i].getAttribute('aria-label')||'')){buttons[i].click();break;}}}
+}
+settings.addEventListener('change',applySettings);settings.addEventListener('input',function(event){if(event.target.id==='demo-zoom')applySettings(event);});
+function open(trigger,forceSample,startPage){
+ var seq=++generation;if(viewer)viewer.close();var sample=document.querySelector('#sample').value;
+ var url=!forceSample&&selectedUrl?selectedUrl:samples[sample];
+ var format=!forceSample&&selectedFile?selectedFile.name.split('.').pop().toLowerCase().replace(/^djv$/,'djvu'):sample;
+ if(window.Flippy&&Flippy.supported===false){window.location.assign(url);return;}
+ var run=function(){if(seq!==generation)return;
+ var config=options();config.pdfUrl=url;config.format=format;config.language=language.value;config.theme=theme.value;config.trigger=trigger;config.startPage=startPage||1;
+ config.title=!forceSample&&selectedFile?selectedFile.name:(format==='pdf'||format==='epub'?'Limaraya':format==='cbz'?'Limaraya · illustration gallery':'Green valley');
+ if(format==='djvu'){config.djvujsSrc='https://djvu.js.org/assets/dist/djvu.js';config.djvuIntegrity='sha384-2L4uchU1kPKhHq+pfHZRZC4Aa0iSaT8GV8fX1oUuvmIJJaBguw2+zwG1sheMRee4';}
+ viewer=new Flippy(config);var current=viewer;status.textContent=language.value==='id'?'Memuat reader…':'Loading reader…';
+ current.open().then(function(){if(seq!==generation)return;current.setZoom(+document.querySelector('#demo-zoom').value);attachSettings(current);status.textContent=current.totalPages+' '+(format==='epub'?'chapters':language.value==='id'?'halaman':'pages')+' · '+config.mode;}).catch(function(error){if(error.name!=='AbortError'&&seq===generation)status.textContent=error.message;});
+ };
+ if(window.FlippyReady)FlippyReady.then(run).catch(function(error){status.textContent=error.message;});else run();
+}
+var buttons=document.querySelectorAll('[data-mode]');for(var j=0;j<buttons.length;j++)(function(button){button.addEventListener('click',function(){document.querySelector('#demo-mode').value=button.dataset.mode;showCode();open(button);});})(buttons[j]);
+document.querySelector('[data-story-open]').addEventListener('click',function(event){event.preventDefault();document.querySelector('#sample').value='pdf';document.querySelector('#demo-mode').value='book';open(event.currentTarget,true);});
+settings.addEventListener('submit',function(event){event.preventDefault();open(document.querySelector('.launch-reader'));});showCode();
 window.addEventListener('pagehide',function(){if(viewer)viewer.destroy();if(selectedUrl)URL.revokeObjectURL(selectedUrl);});
 })();

@@ -25,7 +25,7 @@ export function createBookEngine(global) {
     '.fb-root{position:relative;width:100%;height:100%;min-height:240px;display:flex;',
     '  align-items:center;justify-content:center;overflow:hidden;outline:none;',
     '  background:var(--fb-bg,transparent);-webkit-user-select:none;user-select:none;',
-    '  touch-action:pan-y;font-family:inherit}',
+    '  touch-action:none;font-family:inherit}',
     '.fb-root *,.fb-root *::before,.fb-root *::after{box-sizing:border-box}',
 
     /* fallback fullscreen for browsers without the Fullscreen API (iPhone) */
@@ -170,7 +170,7 @@ export function createBookEngine(global) {
   /* ------------------------------------------------------------------ */
 
   function clamp(v, lo, hi) { return v < lo ? lo : v > hi ? hi : v; }
-  function easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+  function smoothStep(t) { return t*t*t*(t*(t*6-15)+10); }
 
   var ICONS = {
     left: '<path d="M15 5 L8 12 L15 19"/>',
@@ -816,7 +816,7 @@ export function createBookEngine(global) {
     function frame(now) {
       if (self.destroyed) return;
       var t = clamp((now - t0) / dur, 0, 1);
-      var e = easeOutCubic(t);
+      var e = smoothStep(t);
       var angle = from + (target - from) * e;
       self._setSheet(k, angle, t < 1);
       var p = clamp(-angle / 180, 0, 1);
@@ -1102,14 +1102,14 @@ export function createBookEngine(global) {
     var u1 = completed ? -W : W;
     var v1 = f.vc;
     var dist = Math.abs(u1 - u0) + Math.abs(v1 - v0);
-    var dur = Math.max(1, this.opts.duration * (dist / (2 * W)));
+    var dur = this.opts.duration === 0 ? 1 : clamp(this.opts.duration * Math.sqrt(dist / (2 * W)), 160, this.opts.duration);
     var lift = (f.vc === 0 ? 1 : -1) * H * 0.05;
     var t0 = performance.now();
 
     function frame(now) {
       if (self.destroyed) return;
       var t = clamp((now - t0) / dur, 0, 1);
-      var e = easeOutCubic(t);
+      var e = smoothStep(t);
       var u = u0 + (u1 - u0) * e;
       var v = v0 + (v1 - v0) * e + lift * Math.sin(e * Math.PI);
       self._foldRender(u, v);
@@ -1184,19 +1184,24 @@ export function createBookEngine(global) {
     this.container.addEventListener('pointercancel', this._onRootUp, true);
 
     this._onKey = function (e) {
-      if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName) || e.target.isContentEditable) return;
       if (e.key === 'Home') { e.preventDefault(); self.goTo(1); }
       else if (e.key === 'End') { e.preventDefault(); self.goTo(self.numPages); }
       else if (e.key === 'PageDown') { e.preventDefault(); self.next(); }
       else if (e.key === 'PageUp') { e.preventDefault(); self.prev(); }
       else if (e.key === 'ArrowRight') { e.preventDefault(); self.opts.readingDirection === 'rtl' ? self.prev() : self.next(); }
       else if (e.key === 'ArrowLeft') { e.preventDefault(); self.opts.readingDirection === 'rtl' ? self.next() : self.prev(); }
-      else if (e.key === '+' || e.key === '=') { self.zoomIn(); }
-      else if (e.key === '-') { self.zoomOut(); }
-      else if (e.key === 'f' || e.key === 'F') { self.toggleFullscreen(); }
+      else if (e.key === '+' || e.key === '=') { e.preventDefault(); self.zoomIn(); }
+      else if (e.key === '-') { e.preventDefault(); self.zoomOut(); }
+      else if (e.key === 'f' || e.key === 'F') { e.preventDefault(); self.toggleFullscreen(); }
       else if (e.key === 'Escape' && self.fsFake) { self.toggleFullscreen(); }
     };
     this.container.addEventListener('keydown', this._onKey);
+    this._onWheel = function (event) {
+      if (event.target.closest('button,input,select,a') || !(event.ctrlKey || self.opts.wheelZoom)) return;
+      event.preventDefault(); self.setZoom(self.zoom * Math.exp(-Math.max(-120, Math.min(120, event.deltaY)) * .006));
+    };
+    this.container.addEventListener('wheel', this._onWheel, { passive: false });
 
     this._onFsChange = function () { self._fsChanged(); };
     document.addEventListener('fullscreenchange', this._onFsChange);
@@ -1656,6 +1661,7 @@ export function createBookEngine(global) {
     document.removeEventListener('fullscreenchange', this._onFsChange);
     document.removeEventListener('webkitfullscreenchange', this._onFsChange);
     this.container.removeEventListener('keydown', this._onKey);
+    this.container.removeEventListener('wheel', this._onWheel);
     this.container.removeEventListener('pointerdown', this._onRootDown, true);
     this.container.removeEventListener('pointermove', this._onRootMove, true);
     this.container.removeEventListener('pointerup', this._onRootUp, true);

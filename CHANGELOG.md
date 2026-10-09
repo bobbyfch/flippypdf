@@ -1,3 +1,12 @@
+# 2.2.0 — 2026-10-09
+
+- Lazy EPUB/CBZ adapters, optional external DjVu decoder, and real format samples.
+- Seamless configurable webtoon spacing, Ctrl-wheel/touch zoom, global keyboard help and shortcuts.
+- Smoother fold easing, optional paper grain, live demo parameter controls inside the reader.
+- Rebuilt local-file panel, icon theme picker, story card opens the interactive reader.
+- English and Indonesian README; explicit format, resource and decoder license limits.
+- Preserve PDF API and historical CDN paths/tags.
+
 # 2.1.0 — 2026-10-09
 
 - Manga RTL, reading filters, setFilter API and ES5 compatibility loader with original-PDF fallback.

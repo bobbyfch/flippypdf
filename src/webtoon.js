@@ -1,4 +1,5 @@
 import { createPdfTask } from './pdf-loader.js';
+import { bindZoomGestures } from './gestures.js';
 
 export class Webtoon {
   constructor(container, opts) {
@@ -6,14 +7,17 @@ export class Webtoon {
     this.destroyed = false; this.jobs = []; this.running = 0; this.slots = []; this.visible = new Set();
     container.classList.add('flippy-webtoon');
     container.tabIndex = 0;
+    container.style.setProperty('--flippy-page-gap', `${opts.pageGap ?? 0}px`);
+    this.removeGestures = bindZoomGestures(container, this, opts);
     this.onKey = e => {
-      if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
-      if (['ArrowRight', 'ArrowDown', 'PageDown'].includes(e.key)) { e.preventDefault(); this.next(); }
-      if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); this.prev(); }
+      if (e.ctrlKey || e.metaKey || e.altKey || e.target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+      const rtl = opts.readingDirection === 'rtl';
+      if ([rtl ? 'ArrowLeft' : 'ArrowRight', 'ArrowDown', 'PageDown'].includes(e.key)) { e.preventDefault(); this.next(); }
+      if ([rtl ? 'ArrowRight' : 'ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); this.prev(); }
       if (e.key === 'Home') { e.preventDefault(); this.goTo(1); }
       if (e.key === 'End') { e.preventDefault(); this.goTo(this.numPages); }
-      if (e.key === '+' || e.key === '=') this.zoomIn();
-      if (e.key === '-') this.zoomOut();
+      if (e.key === '+' || e.key === '=') { e.preventDefault(); this.zoomIn(); }
+      if (e.key === '-') { e.preventDefault(); this.zoomOut(); }
     };
     container.addEventListener('keydown', this.onKey);
     this.status = document.createElement('p'); this.status.textContent = 'Loading PDF…'; container.appendChild(this.status);
@@ -71,7 +75,8 @@ export class Webtoon {
         });
       };
       this.container.addEventListener('scroll', this.onScroll, { passive: true });
-      this.ro = new ResizeObserver(() => { this.visible.forEach(slot => { this.free(slot); this.queue(slot); }); }); this.ro.observe(this.container);
+    this.ro = new ResizeObserver(() => { this.visible.forEach(slot => { this.free(slot); this.queue(slot); }); }); this.ro.observe(this.container);
+    this.slots.forEach(slot => this.ro.observe(slot.el));
       this.goTo(this.opts.startPage || 1);
       this.emit('ready', { pages: this.numPages });
     } catch (error) { if (!this.destroyed) this.emit('error', { error }); }
@@ -111,13 +116,14 @@ export class Webtoon {
   currentPage() { return this.page; }
   next() { this.goTo(this.page + 1); }
   prev() { this.goTo(this.page - 1); }
-  setZoom(value) { this.zoom = Math.max(.5, Math.min(3, Number(value) || 1)); this.container.style.setProperty('--flippy-page-width', `${Math.round(760 * this.zoom)}px`); }
+  setZoom(value) { this.zoom = Math.max(.5, Math.min(3, Number(value) || 1)); this.container.style.setProperty('--flippy-page-width', `${Math.round(Math.min(760,this.container.clientWidth-40) * this.zoom)}px`); this.container.style.setProperty('--flippy-page-max',this.zoom>1?'none':'100%'); this.emit('zoomchange',{zoom:this.zoom}); }
   zoomIn() { this.setZoom(this.zoom + .25); }
   zoomOut() { this.setZoom(this.zoom - .25); }
   toggleFullscreen() { if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {}); else this.container.requestFullscreen?.().catch(() => {}); }
   destroy() {
     if (this.destroyed) return; this.destroyed = true; this.jobs = [];
     this.observer?.disconnect(); this.pageObserver?.disconnect(); this.ro?.disconnect();
+    this.removeGestures?.();
     cancelAnimationFrame(this.scrollFrame);
     this.slots.forEach(slot => this.free(slot));
     this.loadingTask?.destroy().catch(() => {});

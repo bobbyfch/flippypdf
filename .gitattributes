@@ -7,3 +7,6 @@
 *.ttf binary
 dist/vendor/** -whitespace
 *.jpg binary
+*.epub binary
+*.cbz binary
+*.djvu binary

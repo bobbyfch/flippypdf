@@ -18,14 +18,14 @@ Do not move private PDFs into GitHub Pages.
 This repo is not automatically published to npm. Install from the GitHub tag:
 
 ```sh
-npm install github:bobbyfch/flippypdf#v2.1.0
+npm install github:bobbyfch/flippypdf#v2.2.0
 ```
 
 ```ts
 import Flippy, { type FlippyOptions } from 'flippypdf';
 const options: FlippyOptions = {
   pdfUrl: '/api/ebook/42',
-  assetBase: 'https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.1.0/dist/'
+  assetBase: 'https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.2.0/dist/'
 };
 const viewer = new Flippy(options);
 await viewer.open();

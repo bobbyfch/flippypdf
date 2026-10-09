@@ -1,7 +1,7 @@
 {
   "name": "flippypdf",
-  "version": "2.1.0",
-  "description": "Framework-independent PDF flipbook with lazy PDF.js loading",
+  "version": "2.2.0",
+  "description": "Framework-independent PDF, EPUB and comic reader with lazy format adapters",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -37,6 +37,7 @@
   "devDependencies": {
     "@playwright/test": "1.64.0",
     "esbuild": "0.28.2",
+    "fflate": "0.8.3",
     "pdfjs-dist": "4.10.38",
     "typescript": "5.9.3",
     "vue": "3.5.43"

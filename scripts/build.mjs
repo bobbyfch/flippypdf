@@ -3,10 +3,12 @@ import { mkdir, copyFile, cp, readFile, writeFile, stat } from 'node:fs/promises
 import { createHash } from 'node:crypto';
 import { gzipSync } from 'node:zlib';
 
-const banner = '/*! FlippyPDF v2.1.0 | MIT Bobby Fajar Christian | PDFlipbook MIT Symple NZ | see THIRD_PARTY_NOTICES.md */';
+const banner = '/*! FlippyPDF v2.2.0 | MIT Bobby Fajar Christian | PDFlipbook MIT Symple NZ | see THIRD_PARTY_NOTICES.md */';
 for (const dir of ['dist/js', 'dist/css', 'dist/types', 'dist/vendor/pdfjs/build', 'dist/vendor/pdfjs/legacy/build']) await mkdir(dir, { recursive: true });
 await build({ entryPoints: ['src/browser.js'], outfile: 'dist/js/flippy.min.js', bundle: true, minify: true, format: 'iife', target: 'es2020', banner: { js: banner }, legalComments: 'none' });
 await build({ entryPoints: ['src/module.js'], outfile: 'dist/js/flippy.esm.js', bundle: true, minify: true, format: 'esm', target: 'es2020', banner: { js: banner }, legalComments: 'none' });
+for (const [name,entry] of [['archive','src/archive.js'],['djvu','src/djvu.js']]) await build({entryPoints:[entry],outfile:'dist/js/flippy.'+name+'.js',bundle:true,minify:true,format:'esm',target:'es2020',legalComments:'none'});
+await copyFile('node_modules/fflate/LICENSE','dist/fflate-LICENSE.txt');
 const css = await transform(await readFile('src/flippy.css', 'utf8'), { loader: 'css', minify: true });
 await writeFile('dist/css/flippy.min.css', `${banner}\n${css.code}`);
 await copyFile('src/index.d.ts', 'dist/types/index.d.ts');
@@ -19,8 +21,8 @@ for (const folder of ['build', 'legacy/build']) {
 for (const folder of ['cmaps', 'standard_fonts']) await cp(`node_modules/pdfjs-dist/${folder}`, `dist/vendor/pdfjs/${folder}`, { recursive: true });
 await copyFile('node_modules/pdfjs-dist/LICENSE', 'dist/vendor/pdfjs/LICENSE');
 await copyFile('licenses/PDFlipbook-MIT.txt', 'dist/PDFlipbook-LICENSE.txt');
-const manifest = { version: '2.1.0', pdfjs: '4.10.38', assets: {} };
-for (const path of ['dist/js/flippy.min.js', 'dist/js/flippy.esm.js', 'dist/js/flippy.compat.js', 'dist/css/flippy.min.css', 'dist/sound/turnPage.mp3', 'dist/vendor/pdfjs/build/pdf.min.mjs', 'dist/vendor/pdfjs/build/pdf.worker.min.mjs']) {
+const manifest = { version: '2.2.0', pdfjs: '4.10.38', assets: {} };
+for (const path of ['dist/js/flippy.min.js', 'dist/js/flippy.esm.js', 'dist/js/flippy.compat.js', 'dist/js/flippy.archive.js', 'dist/js/flippy.djvu.js', 'dist/css/flippy.min.css', 'dist/sound/turnPage.mp3', 'dist/vendor/pdfjs/build/pdf.min.mjs', 'dist/vendor/pdfjs/build/pdf.worker.min.mjs']) {
   const data = await readFile(path);
   manifest.assets[path] = { bytes: (await stat(path)).size, gzip: gzipSync(data).length, sha256: createHash('sha256').update(data).digest('hex') };
 }

@@ -93,6 +93,8 @@ export function createReader(global, engine) {
     }
 
     function open(options) {
+        var words = {"Pembaca e-book: ":"E-book reader: ","Tampilkan penanda dan pratinjau halaman":"Show bookmarks and page previews","Aktifkan suara halaman":"Enable page sound","Matikan suara halaman":"Disable page sound","Unduh ":"Download ","Tutup pembaca":"Close reader","Penanda halaman":"Bookmarks","Pratinjau halaman":"Page previews","Posisi halaman":"Reading position","Halaman ":"Page ","Lanjut atau buka halaman":"Next or go to page","Tandai halaman ini":"Bookmark this page","Belum ada halaman yang ditandai.":"No bookmarks yet.","Buka halaman ":"Go to page ","Hapus penanda halaman ini":"Remove this bookmark","Gunakan nomor halaman untuk dokumen yang sangat panjang.":"Use page numbers for very long documents.","Pratinjau halaman ":"Preview page ","Buka PDF":"Open PDF","Berkas PDF tidak dapat dimuat. Periksa koneksi atau coba lagi.":"The PDF could not be loaded. Check your connection or retry.","Efek buku tidak tersedia di browser ini. Anda dapat mencoba membuka PDF langsung.":"The book effect is unavailable. You can try opening the original PDF."};
+        function t(label) { return options.language === "en" ? words[label] || label : label; }
         if (!engine || !options || (!options.url && !options.data)) {
             return Promise.reject(new Error('Pembaca tidak tersedia'));
         }
@@ -120,12 +122,13 @@ export function createReader(global, engine) {
         var overlay = document.createElement('div');
         overlay.className = 'library-reader-overlay is-entering';
         overlay.dataset.flippyTheme = options.theme || 'auto';
+        overlay.dataset.paper = options.paperTexture ? 'true' : 'false';
         var filters = { none: 'none', grayscale: 'grayscale(1)', sepia: 'sepia(.7)', contrast: 'grayscale(1) contrast(1.4)', warm: 'sepia(.35) saturate(.8)', cool: 'hue-rotate(180deg) saturate(.65)' };
         overlay.style.setProperty('--flippy-page-filter', filters[options.filter] || 'none');
         if (options.zIndex) overlay.style.zIndex = String(options.zIndex);
         overlay.setAttribute('role', 'dialog');
         overlay.setAttribute('aria-modal', 'true');
-        overlay.setAttribute('aria-label', 'Pembaca e-book: ' + (options.title || 'E-book'));
+        overlay.setAttribute('aria-label', t("Pembaca e-book: ") + (options.title || 'E-book'));
         var shell = document.createElement('div');
         shell.className = 'library-reader-shell';
         overlay.appendChild(shell);
@@ -138,6 +141,16 @@ export function createReader(global, engine) {
         header.appendChild(title);
         var actions = document.createElement('div');
         actions.className = 'library-reader-actions';
+        var helpButton = document.createElement('button');
+        helpButton.type = 'button'; helpButton.className = 'library-reader-button';
+        helpButton.textContent = '?'; helpButton.setAttribute('aria-label', 'Keyboard shortcuts');
+        var help = document.createElement('div'); help.className = 'flippy-shortcuts'; help.hidden = true;
+        help.textContent = '← → / PgUp PgDn: navigate · Home / End: first / last · + / −: zoom · 0: reset zoom · F: fullscreen · B: bookmark · M: sound · ?: shortcuts · Esc: close. Ctrl + wheel / trackpad pinch: zoom. EPUB numbers refer to chapters.';
+        helpButton.setAttribute('aria-expanded','false');
+        function toggleHelp() { help.hidden = !help.hidden; helpButton.setAttribute('aria-expanded', String(!help.hidden)); }
+        helpButton.addEventListener('click', toggleHelp);
+        actions.appendChild(helpButton);
+
         var filter = document.createElement('select');
         filter.className = 'flippy-filter';
         filter.setAttribute('aria-label', 'Reading filter / Filter baca');
@@ -152,24 +165,26 @@ export function createReader(global, engine) {
             overlay.style.setProperty('--flippy-page-filter', filters[filter.value]);
         });
         actions.appendChild(filter);
-        var marksButton = button('Tampilkan penanda dan pratinjau halaman', null, 'bookmarks');
+        var marksButton = button(t("Tampilkan penanda dan pratinjau halaman"), null, 'bookmarks');
         marksButton.setAttribute('aria-expanded', 'false');
-        var soundButton = button('Aktifkan suara halaman', null, 'muted');
+        var soundButton = button(t("Aktifkan suara halaman"), null, 'muted');
         var download = document.createElement('a');
         download.className = 'library-reader-button';
-        download.setAttribute('aria-label', 'Unduh PDF');
-        download.title = 'Unduh PDF';
+        var documentFormat = options.format || 'pdf';
+        download.setAttribute('aria-label', t("Unduh ") + documentFormat.toUpperCase());
+        download.title = t("Unduh ") + documentFormat.toUpperCase();
         download.appendChild(makeIcon('download'));
         download.href = options.url || '#';
         if (!options.url) download.hidden = true;
-        download.setAttribute('download', ((options.title || 'ebook').replace(/[\\/:*?"<>|]/g, '').trim().slice(0, 80) || 'ebook') + '.pdf');
-        var closeButton = button('Tutup pembaca', 'library-reader-button library-reader-close', 'close');
+        download.setAttribute('download', ((options.title || 'ebook').replace(/\.(pdf|epub|cbz|djvu|djv)$/i, '').replace(/[\\/:*?"<>|]/g, '').trim().slice(0, 80) || 'ebook') + '.' + documentFormat);
+        var closeButton = button(t("Tutup pembaca"), 'library-reader-button library-reader-close', 'close');
         actions.appendChild(marksButton);
         actions.appendChild(soundButton);
         actions.appendChild(download);
         actions.appendChild(closeButton);
         header.appendChild(actions);
         shell.appendChild(header);
+        shell.appendChild(help);
 
         var content = document.createElement('div');
         content.className = 'library-reader-content';
@@ -183,11 +198,11 @@ export function createReader(global, engine) {
         sidebar.className = 'library-reader-sidebar';
         sidebar.hidden = true;
         var sidebarTitle = document.createElement('h3');
-        sidebarTitle.textContent = 'Penanda halaman';
+        sidebarTitle.textContent = t("Penanda halaman");
         var marksList = document.createElement('div');
         marksList.className = 'library-reader-marks';
         var thumbsTitle = document.createElement('h3');
-        thumbsTitle.textContent = 'Pratinjau halaman';
+        thumbsTitle.textContent = t("Pratinjau halaman");
         var thumbsList = document.createElement('div');
         thumbsList.className = 'library-reader-thumbs';
         sidebar.appendChild(sidebarTitle);
@@ -205,11 +220,11 @@ export function createReader(global, engine) {
         progress.max = '1';
         progress.value = '1';
         progress.disabled = true;
-        progress.setAttribute('aria-label', 'Posisi halaman');
+        progress.setAttribute('aria-label', t("Posisi halaman"));
         var pageForm = document.createElement('form');
         pageForm.className = 'library-reader-page-form';
         var label = document.createElement('label');
-        label.textContent = 'Halaman ';
+        label.textContent = options.format === "epub" ? (options.language === "en" ? "Chapter " : "Bab ") : t("Halaman ");
         var pageInput = document.createElement('input');
         pageInput.type = 'number';
         pageInput.min = '1';
@@ -218,12 +233,12 @@ export function createReader(global, engine) {
         label.appendChild(pageInput);
         var total = document.createElement('span');
         total.textContent = ' / …';
-        var goButton = button('Lanjut atau buka halaman', null, 'open');
+        var goButton = button(t("Lanjut atau buka halaman"), null, 'open');
         goButton.type = 'submit';
         pageForm.appendChild(label);
         pageForm.appendChild(total);
         pageForm.appendChild(goButton);
-        var bookmarkButton = button('Tandai halaman ini', null, 'bookmark');
+        var bookmarkButton = button(t("Tandai halaman ini"), null, 'bookmark');
         bookmarkButton.setAttribute('aria-pressed', 'false');
         footer.appendChild(progress);
         footer.appendChild(pageForm);
@@ -235,11 +250,11 @@ export function createReader(global, engine) {
             var marks = state.marks.filter(function (n) { return Number.isInteger(n) && n >= 1 && (!state.pages || n <= state.pages); }).sort(function (a, b) { return a - b; });
             if (!marks.length) {
                 var empty = document.createElement('p');
-                empty.textContent = 'Belum ada halaman yang ditandai.';
+                empty.textContent = t("Belum ada halaman yang ditandai.");
                 marksList.appendChild(empty);
             }
             marks.forEach(function (page) {
-                var item = button('Buka halaman ' + page, 'library-reader-bookmark-item', 'page', String(page));
+                var item = button(t("Buka halaman ") + page, 'library-reader-bookmark-item', 'page', String(page));
                 item.addEventListener('click', function () {
                     if (state.book) state.book.goTo(page);
                     sidebar.hidden = true;
@@ -249,7 +264,7 @@ export function createReader(global, engine) {
             });
             var marked = marks.indexOf(state.current) !== -1;
             bookmarkButton.setAttribute('aria-pressed', marked ? 'true' : 'false');
-            var label = marked ? 'Hapus penanda halaman ini' : 'Tandai halaman ini';
+            var label = marked ? t("Hapus penanda halaman ini") : t("Tandai halaman ini");
             bookmarkButton.setAttribute('aria-label', label);
             bookmarkButton.title = label;
             bookmarkButton.replaceChildren(makeIcon(marked ? 'bookmarkOff' : 'bookmark'));
@@ -308,9 +323,16 @@ export function createReader(global, engine) {
         function buildThumbs() {
             if (state.thumbsBuilt || !state.pages) return;
             state.thumbsBuilt = true;
+            if (options.format === 'epub') {
+                for(var n=1;n<=state.pages;n++) (function(number){
+                    var item=button('Chapter '+number,'library-reader-mark');
+                    item.addEventListener('click',function(){state.book.goTo(number);});thumbsList.appendChild(item);
+                })(n);
+                return;
+            }
             if (state.pages > 1000) {
                 var notice = document.createElement('p');
-                notice.textContent = 'Gunakan nomor halaman untuk dokumen yang sangat panjang.';
+                notice.textContent = t("Gunakan nomor halaman untuk dokumen yang sangat panjang.");
                 thumbsList.appendChild(notice);
                 return;
             }
@@ -319,8 +341,8 @@ export function createReader(global, engine) {
                 (function (number) {
                     var item = button('', 'library-reader-thumb');
                     item.dataset.page = String(number);
-                    item.setAttribute('aria-label', 'Pratinjau halaman ' + number);
-                    item.title = 'Halaman ' + number;
+                    item.setAttribute('aria-label', t("Pratinjau halaman ") + number);
+                    item.title = t("Halaman ") + number;
                     var canvas = document.createElement('canvas');
                     canvas.setAttribute('aria-hidden', 'true');
                     var caption = document.createElement('span');
@@ -354,7 +376,7 @@ export function createReader(global, engine) {
         }
 
         function updateSound() {
-            var label = state.sound ? 'Matikan suara halaman' : 'Aktifkan suara halaman';
+            var label = state.sound ? t("Matikan suara halaman") : t("Aktifkan suara halaman");
             soundButton.setAttribute('aria-label', label);
             soundButton.title = label;
             soundButton.replaceChildren(makeIcon(state.sound ? 'sound' : 'muted'));
@@ -375,25 +397,33 @@ export function createReader(global, engine) {
             message.className = 'library-reader-fallback';
             var text = document.createElement('p');
             var unavailable = error && /missing pdf|unexpected server response|invalid pdf|failed to fetch|http response/i.test(String(error.message || error));
-            text.textContent = unavailable
-                ? 'Berkas PDF tidak dapat dimuat. Periksa koneksi atau coba lagi.'
-                : 'Efek buku tidak tersedia di browser ini. Anda dapat mencoba membuka PDF langsung.';
+            text.textContent = options.format !== 'pdf' ? (options.language === 'en' ? 'This document could not be opened. Check its format or try another file.' : 'Dokumen tidak dapat dibuka. Periksa format atau coba file lain.') : unavailable
+                ? t("Berkas PDF tidak dapat dimuat. Periksa koneksi atau coba lagi.")
+                : t("Efek buku tidak tersedia di browser ini. Anda dapat mencoba membuka PDF langsung.");
             var link = document.createElement('a');
             link.href = options.url || '#';
             if (!options.url) link.hidden = true;
             link.target = '_blank';
             link.rel = 'noopener';
-            link.textContent = 'Buka PDF';
+            link.textContent = options.format === "pdf" ? t("Buka PDF") : (options.language === "en" ? "Download original" : "Unduh dokumen asli");
             message.appendChild(text);
             message.appendChild(link);
             bookHost.appendChild(message);
         }
 
         state.onKey = function (event) {
-            if (event.key === 'Escape') { event.preventDefault(); close(); return; }
+            if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey) return;
+            if (event.key === 'Escape') { event.preventDefault(); if(!help.hidden)toggleHelp();else close(); return; }
+            if (!/^(INPUT|TEXTAREA|SELECT)$/.test(event.target.tagName) && !event.target.isContentEditable && state.book) {
+                var book=state.book, rtl=options.mode==='manga'||options.readingDirection==='rtl';
+                var key=event.key;
+                if(key==='?' ){event.preventDefault();toggleHelp();return;}
+                var actions={ArrowLeft:()=>rtl?book.next():book.prev(),ArrowRight:()=>rtl?book.prev():book.next(),PageDown:()=>book.next(),PageUp:()=>book.prev(),Home:()=>book.goTo(1),End:()=>book.goTo(state.pages),'+':()=>book.zoomIn(),'=':()=>book.zoomIn(),'-':()=>book.zoomOut(),'0':()=>book.setZoom(1),f:()=>book.toggleFullscreen(),F:()=>book.toggleFullscreen(),b:()=>bookmarkButton.click(),B:()=>bookmarkButton.click(),m:()=>soundButton.click(),M:()=>soundButton.click()};
+                if(actions[key]){event.preventDefault();actions[key]();return;}
+            }
             if (event.key !== 'Tab') return;
-            var focusable = Array.prototype.filter.call(overlay.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled])'), function (node) {
-                return !node.closest('[hidden]');
+            var focusable = Array.prototype.filter.call(overlay.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled]), summary'), function (node) {
+                return !node.closest('[hidden]') && node.getClientRects().length > 0;
             });
             if (!focusable.length) return;
             var first = focusable[0], last = focusable[focusable.length - 1];
@@ -484,6 +514,7 @@ export function createReader(global, engine) {
 
         try {
             state.book = engine.create(bookHost, {
+                ...options,
                 url: options.url,
                 data: options.data,
                 httpHeaders: options.httpHeaders,

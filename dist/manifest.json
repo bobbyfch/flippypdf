@@ -1,26 +1,36 @@
 {
-  "version": "2.1.0",
+  "version": "2.2.0",
   "pdfjs": "4.10.38",
   "assets": {
     "dist/js/flippy.min.js": {
-      "bytes": 65872,
-      "gzip": 20097,
-      "sha256": "5b8c3d82be9131f7d0d2cc6908dc8e8fcd8a4c00c65607b7f1bec77ea78ef1e8"
+      "bytes": 71926,
+      "gzip": 21937,
+      "sha256": "a09214aa116bfd092bc31f655c5c99383b1f382f2dff5fe56d93e5ed66d9422a"
     },
     "dist/js/flippy.esm.js": {
-      "bytes": 65946,
-      "gzip": 20146,
-      "sha256": "bab1ceb53f7487552804efeb12dbdef4a22e34b098815c77235a0ee06608c37a"
+      "bytes": 72000,
+      "gzip": 21976,
+      "sha256": "4cdf91d4513c920199b7748fef26c11f46983e5172dcd50e45369dffe97adeca"
     },
     "dist/js/flippy.compat.js": {
       "bytes": 1525,
       "gzip": 667,
       "sha256": "25c29c12e1eb60dfc1b63bda98bbf52eeadead195972198ae551849461d51eda"
     },
+    "dist/js/flippy.archive.js": {
+      "bytes": 13829,
+      "gzip": 6240,
+      "sha256": "4d143dbc4a119b0f477db048141e3ac7bf15143cf6687b3d95ae36d7872f16cc"
+    },
+    "dist/js/flippy.djvu.js": {
+      "bytes": 2933,
+      "gzip": 1430,
+      "sha256": "a582646830332ef5eab8d58113f8f929005eb86e0e0b7cf3a6c20637925b05eb"
+    },
     "dist/css/flippy.min.css": {
-      "bytes": 8061,
-      "gzip": 2315,
-      "sha256": "b8098db95a173996f0054bdf669c0838161c704f184169c128cad1a7c7a3ca34"
+      "bytes": 8821,
+      "gzip": 2522,
+      "sha256": "6f60164c2140701a8d85f6774af90f841e12fa73c6e27b3c4e1bfb3b46b3441d"
     },
     "dist/sound/turnPage.mp3": {
       "bytes": 23839,
