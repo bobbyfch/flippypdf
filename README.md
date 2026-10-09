@@ -1,3 +1,12 @@
+# FlippyPDF — legacy distribution
+
+> **The project has been reborn as [Sela 1.0](https://github.com/bobbyfch/sela).**
+> Visit the [new live playground](https://bobbyfch.github.io/sela/) or [download the dedicated bookshelf extensions](https://github.com/bobbyfch/sela/releases/tag/v1.0.0).
+> Existing FlippyPDF tags and pinned CDN URLs remain available for compatibility. New integrations should use `bobbyfch/sela@v1.0.0`.
+
+<details>
+<summary>Historical documentation (superseded)</summary>
+
 <p align="center"><img src="logo.svg" width="88" alt="Sela open-book emblem"></p>
 <h1 align="center">Sela</h1>
 <p align="center"><strong>A place between. A story within. 📖</strong><br>PDF · EPUB · CBZ · TXT · Markdown · HTML · FB2 · optional DjVu<br>Book flip · Manga RTL · Seamless webtoon · Single page</p>
@@ -193,3 +202,5 @@ The direction is **one reading interface, optional capabilities, many stacks**. 
 MIT © Bobby Fajar Christian. Engine adapted from [PDFlipbook](https://github.com/SympleNZ/PDFlipbook) (MIT), PDF renderer [PDF.js](https://github.com/mozilla/pdf.js) (Apache-2.0), ZIP adapter fflate (MIT). External DjVu.js decoder is GPL-2.0 and is not bundled. [Third-party notices](THIRD_PARTY_NOTICES.md).
 
 If Sela makes your project easier to read, a ⭐ helps others find it. Bug reports are welcome: include a reproducible PDF, browser version, mode and console error.
+
+</details>
