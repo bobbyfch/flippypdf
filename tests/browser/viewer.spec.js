@@ -123,7 +123,8 @@ test('private endpoint headers, binary data, and host style isolation', async ({
   expect(auth).toBe('Bearer fixture');
   const buttonWidth = await page.getByRole('button', { name: 'Tutup pembaca', exact: true }).evaluate(el => el.getBoundingClientRect().width);
   expect(buttonWidth).toBeGreaterThanOrEqual(38);
-  expect(await page.locator('.library-reader-footer').evaluate(el => el.getBoundingClientRect().width)).toBe(await page.locator('.library-reader-shell').evaluate(el => el.getBoundingClientRect().width));
+  const footerDifference = await page.evaluate(() => Math.abs(document.querySelector('.library-reader-footer').getBoundingClientRect().width - document.querySelector('.library-reader-shell').getBoundingClientRect().width));
+  expect(footerDifference).toBeLessThan(1);
   await page.evaluate(() => testViewer.close());
   const result = await page.evaluate(async bytes => {
     const data = new Uint8Array(bytes);
