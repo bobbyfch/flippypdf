@@ -45,7 +45,7 @@ Unused local reader assets were removed after migration in v2.1.0; Git history r
 
 ## Validation scope
 
-Local Chromium/Edge automation covers three modes, real canvas rendering,
+Local Chromium/Edge automation covers four PDF modes, real canvas rendering,
 navigation, bookmarks, close/reopen, one-page and mixed-size PDF, invalid input,
 legacy PDF.js build, deferred loading cleanup, error fallback/retry, mobile
 light/dark/reduced motion/focus, ESM and Vue runtime mount/unmount.
@@ -53,3 +53,16 @@ Unit tests cover SSR import, URL schemes, and caller-owned binary PDF data.
 Type declarations compile in strict TypeScript. Real Safari/iOS, Firefox,
 encrypted-PDF fixtures, long-document profiling, and authenticated intranet
 device testing are not covered by these checks.
+
+## 2.2 additions
+
+EPUB and CBZ use lazy format adapters; DjVu uses a separately supplied decoder.
+See [format scope and limits](formats.md). Webtoon defaults to zero page gap;
+set `pageGap` for spacing. `paperTexture` affects book faces. `wheelZoom` is
+opt-in; Ctrl-wheel zoom is available without changing ordinary scrolling.
+Reader `language` accepts `en` or `id` and defaults to Indonesian for existing
+integrations. Pages chooses the reader language from its flag controls.
+
+The browser suite also covers real EPUB/CBZ/DjVu samples, archive errors,
+shortcuts, zoom, mobile live settings and language/theme persistence. PDF text
+selection, search and annotations remain proposed work, not released features.

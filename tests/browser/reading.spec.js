@@ -41,7 +41,8 @@ test('manga arrows, left navigation and filters preserve PDF pixels', async ({ p
 
 test('site language/theme persistence, responsive layout and metadata', async ({ page }) => {
   await page.goto('/');
-  await page.locator('#language').selectOption('id');
+  await page.locator('[data-language-choice=id]').click();
+  await expect(page.locator('[data-language-choice=id]')).toHaveAttribute('aria-pressed','true');
   await expect(page.locator('html')).toHaveAttribute('lang', 'id');
   await expect(page.locator('h1')).toContainText('Ritme bacamu');
   await page.locator('[data-theme-choice=dark]').click();
@@ -51,7 +52,8 @@ test('site language/theme persistence, responsive layout and metadata', async ({
   await page.screenshot({ path: 'test-results/site-desktop-dark-id.png', fullPage: true });
   await page.setViewportSize({ width: 375, height: 812 });
   await page.locator('[data-theme-choice=light]').click();
-  await page.locator('#language').selectOption('en');
+  await page.locator('[data-language-choice=en]').click();
+  await expect(page.locator('[data-language-choice=en]')).toHaveAttribute('aria-pressed','true');
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.screenshot({ path: 'test-results/site-mobile-light-en.png', fullPage: true });
   expect(await page.locator('link[rel=canonical]').getAttribute('href')).toBe('https://bobbyfch.github.io/flippypdf/');

@@ -6,6 +6,8 @@
 
 [English](README.md) · [Demo interaktif](https://bobbyfch.github.io/flippypdf/) · [Integrasi](docs/integrations.md) · [Format & batasan](docs/formats.md)
 
+[![Tampilan reader FlippyPDF](site/preview-reader.jpg)](https://bobbyfch.github.io/flippypdf/)
+
 ## ✨ Yang tersedia
 
 - PDF dengan PDF.js yang baru dimuat saat diperlukan.
@@ -16,7 +18,7 @@
 - Bookmark, progres tersimpan, filter warna, light/dark/system, reduced motion.
 - Playground untuk mengganti parameter sebelum dan saat membaca.
 
-Tanpa Bootstrap, jQuery, atau icon font wajib. Interface sekitar **21 KiB gzip**; adapter EPUB/CBZ sekitar **6 KiB gzip**, dimuat terpisah. Ukuran total tetap mengikuti renderer dan dokumen yang digunakan.
+Tanpa Bootstrap, jQuery, atau icon font wajib. Interface sekitar **21,4 KiB gzip**; adapter EPUB/CBZ sekitar **6,1 KiB gzip**, dimuat terpisah. PDF.js + worker modern menambah sekitar **491 KiB gzip**, belum termasuk font/CMap bila diperlukan. Ukuran total tetap mengikuti renderer dan dokumen yang digunakan.
 
 ## 🚀 Pasang
 
@@ -33,6 +35,8 @@ document.querySelector('#baca').onclick = () => reader.open().catch(console.erro
 ```
 
 CSS otomatis dimuat. URL berakhiran `.epub`, `.cbz`, `.djvu` dikenali otomatis; URL Blob, endpoint tanpa ekstensi dan byte data perlu `format` eksplisit. DjVu perlu `djvujsSrc` dari decoder GPL-2.0 yang kamu sediakan terpisah. EPUB tidak mendukung DRM, CSS penerbit atau fixed layout; CBZ mendukung gambar raster. Detail ada di [panduan format](docs/formats.md).
+
+Gunakan `language: 'en'` untuk kontrol bahasa Inggris atau `'id'` untuk Indonesia (default). Pada Pages pilih bahasa melalui bendera. `paperTexture` berlaku pada permukaan book; zoom EPUB mengubah ukuran teks. PDF belum memiliki seleksi teks, pencarian atau anotasi. CBR/RAR, MOBI/AZW dan DOCX belum didukung.
 
 CI3, Laravel, Vue, React, Svelte, Angular, Astro, TypeScript dan HTML biasa punya [contoh integrasi](docs/integrations.md). Bootstrap/Tailwind tetap boleh digunakan aplikasi. CDN lama dan tag historis dipertahankan; pin versi untuk produksi.
 
@@ -51,3 +55,9 @@ File yang dipilih di demo diproses di browser tanpa diunggah. Progress/bookmark 
 MIT untuk FlippyPDF, PDFlipbook dan fflate; PDF.js Apache-2.0. Decoder DjVu eksternal GPL-2.0 tidak dibundel. [Lisensi pihak ketiga](THIRD_PARTY_NOTICES.md).
 
 Kalau membantu proyekmu, ⭐ memudahkan orang lain menemukannya. Untuk laporan bug, sertakan contoh dokumen, browser, mode, dan langkah reproduksi.
+
+## 🌱 Arah berikutnya
+
+[Riset dan roadmap](docs/roadmap.md) · [Panduan kontribusi](CONTRIBUTING.md)
+
+Prioritas yang diusulkan: pencarian dan teks PDF yang aksesibel, navigasi EPUB lebih lengkap, fokus panel komik, lalu anotasi yang bisa diekspor. Semua masih rencana, bukan fitur yang sudah dirilis. Instalasi npm registry juga belum tersedia; saat ini gunakan CDN, GitHub atau self-hosted assets.

@@ -7,7 +7,9 @@
 
 A lightweight reading interface for your website. **No Bootstrap, jQuery or icon font required.** PDF.js loads only for PDFs; EPUB and CBZ use a separate lazy adapter. Optional DjVu integration uses an externally supplied decoder.
 
-🇮🇩 Reader PDF dengan empat mode, bookmark, progres tersimpan, dan filter warna. Bisa dipasang pada CI3, Laravel, Vue, React, Svelte, Angular, Astro, atau HTML biasa. Demo mendukung EN/ID serta light/dark/system.
+🇮🇩 [Baca panduan lengkap dalam Bahasa Indonesia →](README.id.md)
+
+[![FlippyPDF live book reader](site/preview-reader.jpg)](https://bobbyfch.github.io/flippypdf/)
 
 ## ✨ Why Flippy?
 
@@ -27,17 +29,36 @@ A lightweight reading interface for your website. **No Bootstrap, jQuery or icon
 
 | Module | Gzip size | Loaded when |
 | --- | ---: | --- |
-| Main interface | ~21 KiB | Main script requested |
+| Main interface | ~21.4 KiB | Main script requested |
 | Scoped CSS | ~2.5 KiB | First open |
 | EPUB / CBZ adapter (includes fflate) | ~6.1 KiB | EPUB or CBZ selected |
 | DjVu adapter | ~1.4 KiB | DjVu selected; external decoder also needed |
-| PDF.js + worker | Separate, larger assets | PDF selected |
+| PDF.js + worker (modern) | ~491 KiB combined | PDF selected; fonts/CMaps may load separately |
 
 The interface is lightweight; total download depends on the document and decoder. [Format capabilities, archive limits and licensing](docs/formats.md).
 
+## 📚 Pick your format
+
+| Document | Experience | Current scope |
+| --- | --- | --- |
+| PDF | Book · single · manga RTL · webtoon | Canvas pages, password option; no text layer, search or annotations yet |
+| EPUB | Selectable text · chapter reading · continuous chapters | Reflowable HTML, reader typography; no encrypted resources or publisher layout fidelity |
+| CBZ | Comic pages in all four modes | Naturally sorted raster images supported by the browser |
+| DjVu | Scanned pages in all four modes | Bundled single-file documents; separately supplied external decoder |
+
+```js
+const reader = new Flippy({
+  url: '/books/story.epub', // EPUB / CBZ / DjVu inferred from URL extension
+  language: 'en', mode: 'webtoon', theme: 'auto', pageGap: 0
+});
+await reader.open();
+```
+
+Set `format: 'epub'`, `'cbz'` or `'djvu'` explicitly for Blob URLs, byte data and extensionless endpoints. DjVu also requires `djvujsSrc`; its GPL-2.0 decoder is not part of the MIT bundle. CBR/RAR, MOBI/AZW, DOCX and DRM are not supported. [Full format guide](docs/formats.md).
+
 ## 🎛️ Read, tweak, repeat
 
-Use `pageGap: 0` for seamless webtoon, `paperTexture: true` for subtle paper grain, `duration: 560` for eased folds, and `wheelZoom: true` to opt into ordinary mouse-wheel zoom. Ctrl + wheel / trackpad pinch zooms without changing ordinary scrolling; touch pinch is also supported. EPUB zoom changes text size.
+Use `pageGap: 0` for seamless webtoon, `paperTexture: true` for subtle grain on book faces, `duration: 560` for eased folds, and `wheelZoom: true` to opt into ordinary mouse-wheel zoom. Ctrl + wheel / trackpad pinch zooms without changing ordinary scrolling; touch pinch is also supported. EPUB zoom changes text size.
 
 | Shortcut | Action |
 | --- | --- |
@@ -87,7 +108,7 @@ import Flippy from 'flippypdf';
 const reader = new Flippy({ pdfUrl: '/story.pdf', mode: 'manga', filter: 'grayscale' });
 await reader.open();
 reader.next().setFilter('sepia');
-reader.addEventListener('pagechange', event => console.log(event));
+reader.addEventListener('pagechange', event => console.log(event.detail.page));
 reader.destroy(); // component cleanup
 ```
 
@@ -119,11 +140,11 @@ Manga preserves PDF page numbers: `next()` increases the page number; **ArrowLef
 
 Filters: `none`, `grayscale`, `sepia`, `contrast`, `warm`, `cool`. Grayscale avoids relying on hue; warm/cool presets are personal adjustments, not medical color-blindness correction. Filters affect canvases, never the source PDF/download.
 
-Events: `ready`, `pagechange`, `pageerror`, `close`, `error`. Options include `startPage`, `id`, `storagePrefix`, `maxScale`, `maxCanvasPixels`, `duration`, `httpHeaders`, `withCredentials`, `password`, `data`, `assetBase`, `pdfBuild`, `zIndex`. [Full declarations](src/index.d.ts).
+Events: `ready`, `pagechange`, `pageerror`, `close`, `error`; payloads are in `event.detail`. Options include `format`, `language`, `pageGap`, `paperTexture`, `wheelZoom`, `startPage`, `id`, `storagePrefix`, `maxScale`, `maxCanvasPixels`, `duration`, `httpHeaders`, `withCredentials`, `password`, `data`, `assetBase`, `pdfBuild`, `zIndex`. Current zoom is available as `reader.zoom`. [Full declarations](src/index.d.ts).
 
 ## Privacy & accessibility
 
-Selected demo PDFs stay in the browser; no upload or analytics. Bookmarks/progress use localStorage when available. CDN requests follow normal browser networking. Keyboard controls, focus trapping, labelled actions and reduced motion are included. PDFs render to canvases; provide an accessible original or alternative content for screen-reader users.
+Selected demo documents stay in the browser; no upload or analytics. Bookmarks/progress use localStorage when available. CDN requests follow normal browser networking. Keyboard controls, focus trapping, labelled actions and reduced motion are included. PDFs render to canvases; provide an accessible original or alternative content for screen-reader users. EPUB scripts and external resources are removed. Physical Safari/iOS and Firefox testing remains outstanding; no full WCAG conformance claim is made.
 
 ## Development
 
@@ -136,7 +157,13 @@ npm run test:browser
 npm run serve
 ```
 
-Tests cover real PDF pixels, layouts, RTL, filters, Vue lifecycle, mobile themes, failures/cancellation and auth headers. CI uses Chromium; local checks use Edge. Platform lists do not imply testing every OS/version.
+The browser suite covers PDF/EPUB/CBZ/DjVu, real pixels, layouts, RTL, filters, Vue lifecycle, flag/theme controls, mobile settings, archive errors, cancellation and auth headers. CI uses Chromium; local checks use Edge. Platform lists do not imply testing every OS/version.
+
+## 🌱 What's next?
+
+[Research & prioritized roadmap](docs/roadmap.md) · [Contributing](CONTRIBUTING.md)
+
+The proposed direction is **one reading interface, optional capabilities, many stacks**: search and accessible text first, richer EPUB navigation, then comic panel focus and portable annotations. These are roadmap ideas, not released features. Npm-registry distribution is also planned; today's installation uses CDN, GitHub or self-hosted assets.
 
 ## Open source 🌱
 

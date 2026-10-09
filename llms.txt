@@ -4,6 +4,7 @@
 - Source and installation: https://github.com/bobbyfch/flippypdf
 - Documentation: https://github.com/bobbyfch/flippypdf/blob/main/docs/integrations.md
 - Format scope: https://github.com/bobbyfch/flippypdf/blob/main/docs/formats.md
+- Proposed roadmap, not released features: https://github.com/bobbyfch/flippypdf/blob/main/docs/roadmap.md
 - License: MIT. PDF.js is Apache-2.0; PDFlipbook/fflate are MIT. External DjVu.js is GPL-2.0 and is not bundled.
 - Modes: book, single, webtoon, manga (right-to-left).
 - Privacy: selected demo files are read in the browser; the demo does not upload them.
