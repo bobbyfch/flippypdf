@@ -33,6 +33,11 @@ jobs:
           cp index.html logo.svg favicon.svg favicon.png robots.txt sitemap.xml llms.txt README.md README.id.md THIRD_PARTY_NOTICES.md manifest.webmanifest sela-sw.js .pages/
           cp -r site dist example .pages/
           touch .pages/.nojekyll
+      - name: Direct active readers to Sela
+        run: |
+          cat > .pages/index.html <<'HTML'
+          <!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Sela — a place between, a story within</title><link rel="canonical" href="https://bobbyfch.github.io/sela/"><meta http-equiv="refresh" content="0;url=https://bobbyfch.github.io/sela/"><body><h1>Sela</h1><p>Our reading room has moved. <a href="https://bobbyfch.github.io/sela/">Open Sela 1.0</a>.</p><script>location.replace('https://bobbyfch.github.io/sela/'+location.search+location.hash);</script></body></html>
+          HTML
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
