@@ -1,0 +1,36 @@
+{
+  "version": "2.0.0",
+  "pdfjs": "4.10.38",
+  "assets": {
+    "dist/js/flippy.min.js": {
+      "bytes": 63787,
+      "gzip": 19565,
+      "sha256": "9799e66f4babfc552c76d77030956f600c21a89f37b3bdcb6e102a5607b7d8c5"
+    },
+    "dist/js/flippy.esm.js": {
+      "bytes": 63861,
+      "gzip": 19615,
+      "sha256": "189afeabe389c4a4452ab3b2f9d0447db0479a3f7a129837b40a4a9655577e3d"
+    },
+    "dist/css/flippy.min.css": {
+      "bytes": 7545,
+      "gzip": 2178,
+      "sha256": "1df165db99619095c2c528f3606393b11d069f49274bba81e7c1a6120289c6b3"
+    },
+    "dist/sound/turnPage.mp3": {
+      "bytes": 23839,
+      "gzip": 14314,
+      "sha256": "15dd78185f6470770354597a74bc625d8ebc80c4a4fe0aa25ac9991ed20fb5a7"
+    },
+    "dist/vendor/pdfjs/build/pdf.min.mjs": {
+      "bytes": 352645,
+      "gzip": 99345,
+      "sha256": "27fc2a057a00f92a4334ad06e17dbd7259912954e9fb7f76400bcca5fd190a9c"
+    },
+    "dist/vendor/pdfjs/build/pdf.worker.min.mjs": {
+      "bytes": 1375838,
+      "gzip": 403895,
+      "sha256": "1baa1844c89c80a5b2797c916e75ab29254be46d8e9cb53cb6364d7aad84be36"
+    }
+  }
+}

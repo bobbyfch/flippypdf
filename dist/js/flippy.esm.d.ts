@@ -1,0 +1,72 @@
+export type FlippyMode = 'book' | 'single' | 'webtoon';
+export interface FlippyOptions {
+  pdfUrl?: string;
+  url?: string;
+  data?: ArrayBuffer | Uint8Array;
+  title?: string;
+  mode?: FlippyMode;
+  theme?: 'auto' | 'light' | 'dark';
+  startPage?: number;
+  id?: string | number;
+  trigger?: HTMLElement;
+  assetBase?: string;
+  cssUrl?: string;
+  autoStyles?: boolean;
+  pdfBuild?: 'modern' | 'legacy';
+  pdfjsSrc?: string;
+  pdfWorkerSrc?: string;
+  pdfjsLib?: { getDocument(options: unknown): unknown };
+  cMapUrl?: string;
+  standardFontDataUrl?: string;
+  soundEnabled?: boolean;
+  soundUrl?: string;
+  maxScale?: number;
+  maxCanvasPixels?: number;
+  duration?: number;
+  zIndex?: number;
+  storagePrefix?: string;
+  httpHeaders?: Record<string, string>;
+  withCredentials?: boolean;
+  password?: string;
+  /** Legacy quality hint; prefer maxScale. */
+  scale?: number;
+  /** Legacy options accepted for source compatibility; automatic sizing/rendering replaces these. */
+  pageWidth?: number;
+  pageHeight?: number;
+  minZoom?: number;
+  maxZoom?: number;
+  zoomStep?: number;
+  parallelRender?: number;
+  jpegQuality?: number;
+  onReady?: (detail: { pages: number }) => void;
+  onClose?: (detail: object) => void;
+  onPageChange?: (detail: { page: number }) => void;
+  onPageError?: (detail: { page: number; error: Error }) => void;
+  onError?: (detail: { error: Error }) => void;
+}
+export declare class Flippy extends EventTarget {
+  static readonly version: string;
+  constructor(options?: FlippyOptions);
+  options: FlippyOptions;
+  readonly overlay: HTMLElement | null;
+  readonly totalPages: number;
+  open(): Promise<this>;
+  close(): void;
+  destroy(): void;
+  currentPage(): number;
+  next(): this;
+  prev(): this;
+  goTo(page: number): this;
+  nextPage(): this;
+  prevPage(): this;
+  goToPage(page: number): this;
+  firstPage(): this;
+  lastPage(): this;
+  zoomIn(): this;
+  zoomOut(): this;
+  setZoom(value: number): this;
+  toggleFullscreen(): this;
+}
+export declare const VERSION: string;
+export default Flippy;
+declare global { interface Window { Flippy: typeof Flippy; } }

@@ -1,0 +1,27 @@
+import { build, transform } from 'esbuild';
+import { mkdir, copyFile, cp, readFile, writeFile, stat } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { gzipSync } from 'node:zlib';
+
+const banner = '/*! FlippyPDF v2.0.0 | MIT Bobby Fajar Christian | PDFlipbook MIT Symple NZ | see THIRD_PARTY_NOTICES.md */';
+for (const dir of ['dist/js', 'dist/css', 'dist/types', 'dist/vendor/pdfjs/build', 'dist/vendor/pdfjs/legacy/build']) await mkdir(dir, { recursive: true });
+await build({ entryPoints: ['src/browser.js'], outfile: 'dist/js/flippy.min.js', bundle: true, minify: true, format: 'iife', target: 'es2020', banner: { js: banner }, legalComments: 'none' });
+await build({ entryPoints: ['src/module.js'], outfile: 'dist/js/flippy.esm.js', bundle: true, minify: true, format: 'esm', target: 'es2020', banner: { js: banner }, legalComments: 'none' });
+const css = await transform(await readFile('src/flippy.css', 'utf8'), { loader: 'css', minify: true });
+await writeFile('dist/css/flippy.min.css', `${banner}\n${css.code}`);
+await copyFile('src/index.d.ts', 'dist/types/index.d.ts');
+await copyFile('src/index.d.ts', 'dist/js/flippy.esm.d.ts');
+await copyFile('site/index.html', 'index.html');
+for (const folder of ['build', 'legacy/build']) {
+  for (const file of ['pdf.min.mjs', 'pdf.worker.min.mjs']) await copyFile(`node_modules/pdfjs-dist/${folder}/${file}`, `dist/vendor/pdfjs/${folder}/${file}`);
+}
+for (const folder of ['cmaps', 'standard_fonts']) await cp(`node_modules/pdfjs-dist/${folder}`, `dist/vendor/pdfjs/${folder}`, { recursive: true });
+await copyFile('node_modules/pdfjs-dist/LICENSE', 'dist/vendor/pdfjs/LICENSE');
+await copyFile('licenses/PDFlipbook-MIT.txt', 'dist/PDFlipbook-LICENSE.txt');
+const manifest = { version: '2.0.0', pdfjs: '4.10.38', assets: {} };
+for (const path of ['dist/js/flippy.min.js', 'dist/js/flippy.esm.js', 'dist/css/flippy.min.css', 'dist/sound/turnPage.mp3', 'dist/vendor/pdfjs/build/pdf.min.mjs', 'dist/vendor/pdfjs/build/pdf.worker.min.mjs']) {
+  const data = await readFile(path);
+  manifest.assets[path] = { bytes: (await stat(path)).size, gzip: gzipSync(data).length, sha256: createHash('sha256').update(data).digest('hex') };
+}
+await writeFile('dist/manifest.json', JSON.stringify(manifest, null, 2) + '\n');
+console.log(JSON.stringify(manifest, null, 2));

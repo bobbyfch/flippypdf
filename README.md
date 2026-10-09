@@ -1,323 +1,172 @@
+<p align="center"><img src="README.png" width="160" alt="FlippyPDF"></p>
 
-<p align="center">
-  <img src="README.png" width="200" alt="Flippy Logo">
-</p>
+# FlippyPDF 2.0
 
-# **FlippyPDF — Modern PDF Viewer**
-> ⚡ Ultra-fast PDF viewer dengan 3 mode tampilan — **100% Pure Vanilla JS, no framework**.
+PDF reader dengan **book flip, webtoon, dan single page**. Core vanilla JavaScript,
+inline SVG, tanpa Bootstrap, jQuery, atau icon font. PDF.js tetap menjadi mesin
+PDF internal, dimuat otomatis ketika reader dibuka.
 
-<p align="center">
-  <img src="https://img.shields.io/badge/License-MIT-blue.svg">
-  <img src="https://img.shields.io/badge/Version-1.0.0-red.svg">
-  <img src="https://img.shields.io/badge/Pure%20JS-✓-brightgreen.svg">
-  <img src="https://img.shields.io/badge/Made%20in-🇮🇩%20Indonesia-orange.svg">
-  <img src="https://img.shields.io/badge/CDN-Ready-purple.svg">
-</p>
+[Demo GitHub Pages](https://bobbyfch.github.io/flippypdf/) ·
+[Integrations](docs/integrations.md) · [Migration](docs/release-v2.md) ·
+[Changelog](CHANGELOG.md) · [MIT license](LICENSE)
 
----
+## Quick start: CDN
 
-## 🔎 Table of Contents
-- [🎮 Demo (Try It First)](#-demo-try-it-first)
-- [🔗 Required CDN](#-required-cdn)
-- [🚀 Cara Penggunaan](#-cara-penggunaan)
-  - [1) Init `.mode-btn` (WAJIB)](#1-init-mode-btn-wajib)
-  - [2) HTML Button (Data Attributes)](#2-html-button-data-attributes)
-  - [3) JavaScript (Full Options)](#3-javascript-full-options)
-  - [4) Mode List](#4-mode-list)
-  - [5) Keyboard Shortcuts](#5-keyboard-shortcuts)
-- [⚙️ Setup & Quick Start](#️-setup--quick-start)
-- [✨ Fitur Utama](#-fitur-utama)
-- [🌐 Browser Support](#-browser-support)
-- [📦 Struktur Project](#-struktur-project)
-- [🛠️ Customization](#️-customization)
-- [🐛 Troubleshooting](#-troubleshooting)
-- [📄 License](#-license)
-- [👤 Author](#-author)
-- [🙏 Credits](#-credits)
-- [📜 Changelog](#-changelog)
+Tidak perlu memasang atau menginisialisasi PDF.js sendiri.
 
----
-
-## 🎮 Demo (Try It First)
-Di halaman contoh (`index.html`), **card demo** ada di atas: pilih **Book Flip / Webtoon / Single** dan klik **Buka PDF**.  
-Contoh file demo: `example/limarayamusic.pdf`.
-
----
-
-## 🔗 Required CDN
-> Pakai Flippy di project lain? Include CDN ini.
-
-**Bootstrap 5.3.2**
 ```html
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-```
-
-**PDF.js 3.11.174 + Worker**
-```html
-<script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.0.0/dist/css/flippy.min.css">
+<script src="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.0.0/dist/js/flippy.min.js"></script>
+<button type="button" id="read">Baca PDF</button>
 <script>
-  if (typeof pdfjsLib !== 'undefined') {
-    pdfjsLib.GlobalWorkerOptions.workerSrc =
-      'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';
-  }
-</script>
-```
-
-**Remix Icons (latest)**
-```html
-<link href="https://cdn.jsdelivr.net/npm/remixicon@latest/fonts/remixicon.css" rel="stylesheet">
-```
-
-**Flippy (LOCAL)**
-```html
-<link rel="stylesheet" href="dist/css/flippy.min.css">
-<script src="dist/js/flippy.min.js"></script>
-```
-
-**Flippy (CDN – Latest, no version)**
-```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bobbyfajarc/flippypdf/dist/css/flippy.min.css">
-<script src="https://cdn.jsdelivr.net/gh/bobbyfajarc/flippypdf/dist/js/flippy.min.js"></script>
-```
----
-
-## 🚀 Cara Penggunaan
-
-### 1) Init `.mode-btn` (WAJIB)
-Kalau kamu pakai button dengan class `.mode-btn`, bind dulu supaya klik-nya membuka viewer.
-```html
-<script>
-document.addEventListener('DOMContentLoaded', () => {
-  const ready = setInterval(() => {
-    if (typeof pdfjsLib !== 'undefined' && typeof Flippy !== 'undefined') {
-      clearInterval(ready);
-      document.querySelectorAll('.mode-btn').forEach(btn => {
-        btn.disabled = false;
-        btn.addEventListener('click', () => {
-          const pdf = btn.dataset.pdf;
-          if (!pdf || !pdf.endsWith('.pdf')) return alert('❌ Invalid PDF file path');
-          const flippy = new Flippy({
-            pdfUrl: pdf,
-            title: btn.dataset.title || 'PDF Viewer',
-            mode: btn.dataset.mode || 'book',
-            soundEnabled: true
-          });
-          flippy.open();
-        });
-      });
-    }
-  }, 200);
+const viewer = new Flippy({
+  pdfUrl: '/media/ebook/42',
+  title: 'My book',
+  mode: 'book',
+  theme: 'auto'
 });
+document.querySelector('#read').addEventListener('click', () => viewer.open());
 </script>
 ```
 
-### 2) HTML Button (Data Attributes)
-Cara paling cepat:
-```html
-<button class="btn btn-primary mode-btn"
-        data-pdf="example/your-file.pdf"
-        data-title="My PDF Document"
-        data-mode="book"
-        data-scale="2.0"
-        data-page-width="450"
-        data-page-height="600"
-        data-sound-enabled="true"
-        data-sound-url="dist/sound/turnPage.mp3">
-  Buka PDF
-</button>
+Stylesheet juga dimuat otomatis saat open jika belum disertakan. Menyertakan
+link CSS di atas memberi kontrol CSP dan loading lebih jelas. Jalur CDN JS,
+CSS, dan sound lama dipertahankan. Tag v1 tidak diubah; v2.0.0 adalah branch
+snapshot rilis, bukan penggantian tag lama. Gunakan ref/commit yang sudah diuji
+untuk production. URL tanpa versi mengikuti perkembangan repository dan cache CDN.
+
+## ESM / TypeScript
+
+Paket belum diterbitkan otomatis ke npm registry. Gunakan ref GitHub:
+
+```sh
+npm install github:bobbyfch/flippypdf#v2.0.0
 ```
 
-**Available Data Attributes**
-- `data-pdf` *(required)* — path PDF  
-- `data-title` — judul dokumen  
-- `data-mode` — `book` | `webtoon` | `single`  
-- `data-scale` — 1.0–3.0  
-- `data-page-width` / `data-page-height` — px  
-- `data-sound-enabled` — `true|false`  
-- `data-sound-url` — path MP3
+```ts
+import Flippy, { type FlippyOptions } from 'flippypdf';
+const options: FlippyOptions = {
+  pdfUrl: '/api/ebook/42',
+  mode: 'single',
+  assetBase: 'https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.0.0/dist/'
+};
+const viewer = new Flippy(options);
+await viewer.open();
+viewer.goTo(3);
+// Saat component/route dilepas:
+viewer.destroy();
+```
 
-### 3) JavaScript (Full Options)
+Raw ESM: `dist/js/flippy.esm.js`. Import dan constructor aman saat SSR;
+`open()` memerlukan DOM dan dipanggil setelah mount. Bundler memakai CDN
+pinned sebagai default asset; self-hosting memerlukan seluruh folder dist dan
+`assetBase` yang menunjuk URL folder tersebut.
+
+## Features
+
+- Book flip: corner fold, bayangan kertas, zoom/pan, fullscreen, keyboard.
+- Single page otomatis untuk layar sempit; webtoon untuk scroll vertikal.
+- Thumbnail saat sidebar diperlukan, bookmark, progres, page jump, resume posisi.
+- Light/dark/auto, reduced motion, focus restoration, dan suara opsional.
+- URL tanpa suffix .pdf, binary PDF data, headers, credentials, dan password.
+- Pembatalan loading/render saat destroy; batas pixel canvas untuk memori.
+- Optional Vue 3 adapter; contoh CI3, Laravel, TypeScript, Bootstrap/Tailwind.
+
+Satu modal aktif pada satu waktu. Membuka instance lain menutup reader sebelumnya.
+Text selection/search, annotation, dan pengisian form PDF belum tersedia.
+Default string UI memakai Bahasa Indonesia; mode webtoon memiliki label navigasi
+English. Belum ada klaim multi-language viewer penuh.
+
+## API
+
 ```js
-const flippy = new Flippy({
-  // Required
-  pdfUrl: 'example/your-file.pdf',
-
-  // Display
-  mode: 'book',               // 'book' | 'webtoon' | 'single'
-  title: 'My PDF Document',
-
-  // Render Quality
-  scale: 2.0,                 // 1.0 - 3.0 (default: 2.0)
-  jpegQuality: 0.92,          // 0.0 - 1.0 (default: 0.92)
-
-  // Book Mode Size
-  pageWidth: 450,
-  pageHeight: 600,
-
-  // Zoom
-  minZoom: 0.5,
-  maxZoom: 3.0,
-  zoomStep: 0.1,
-
-  // Performance
-  parallelRender: 2,          // 1-4
-
-  // Sound
-  soundEnabled: true,
-  soundUrl: 'dist/sound/turnPage.mp3'
-});
-flippy.open();
+await viewer.open(); // document ready; reject jika gagal / AbortError saat ditutup
+viewer.next(); viewer.prev(); viewer.goTo(5);
+viewer.firstPage(); viewer.lastPage();
+viewer.zoomIn(); viewer.zoomOut(); viewer.setZoom(2);
+viewer.toggleFullscreen();
+viewer.currentPage(); viewer.totalPages;
+viewer.close(); viewer.destroy(); // aman dipanggil berulang
+viewer.addEventListener('pagechange', event => console.log(event.detail.page));
+viewer.addEventListener('error', event => console.error(event.detail.error));
 ```
 
-**All Available Options**
-- `pdfUrl` *(string, required)*  
-- `mode` *(string)* — `book|webtoon|single` (default: `book`)  
-- `title` *(string)* — header title (default: `PDF Viewer`)  
-- `scale` *(number)* — 1.0–3.0 (default: 2.0)  
-- `jpegQuality` *(number)* — 0.0–1.0 (default: 0.92)  
-- `pageWidth` / `pageHeight` *(number)* — px (default: 450 / 600)  
-- `minZoom` / `maxZoom` / `zoomStep` *(number)* — zoom control  
-- `parallelRender` *(number)* — 1–4 (default: 2)  
-- `soundEnabled` *(boolean)* — default: `true`  
-- `soundUrl` *(string)* — default: `dist/sound/turnPage.mp3`
+Alias lama: nextPage, prevPage, goToPage. Events: ready, pagechange, pageerror,
+error, close. Callback: onReady, onPageChange, onPageError, onError, onClose.
 
-### 4) Mode List
-- `book` — 3D flip effect  
-- `webtoon` — vertical scroll  
-- `single` — horizontal slide
+| Option | Default / fungsi |
+| --- | --- |
+| pdfUrl / url | URL HTTP(S)/blob; atau gunakan data |
+| data | ArrayBuffer / Uint8Array, disalin sebelum diproses |
+| mode | book / single / webtoon; default book |
+| title | Judul reader; default E-book |
+| theme | auto / light / dark |
+| startPage | Posisi awal; default posisi tersimpan atau 1 |
+| soundEnabled | Preferensi tersimpan; suara awal mati pada reduced motion |
+| soundUrl | Asset audio Flippy, relatif ke base distribusi |
+| assetBase | Base asset CDN/self-hosted, berakhiran slash |
+| cssUrl / autoStyles | Override stylesheet / false jika dikelola aplikasi |
+| pdfBuild | modern atau legacy dari PDF.js versi yang sama |
+| pdfjsSrc / pdfWorkerSrc | Override module + worker dari versi yang cocok |
+| pdfjsLib | Engine yang telah dimuat dan dikonfigurasi aplikasi |
+| maxScale | 1.75, dibatasi 0.5–3 |
+| maxCanvasPixels | 2,500,000 per canvas; batas konfigurasi 250,000–8,000,000 |
+| duration | 560ms, otomatis 0 pada reduced motion |
+| id / storagePrefix | Kunci resume/bookmark; default prefix flippy: |
+| httpHeaders / withCredentials | Akses endpoint PDF aplikasi |
+| password | Password PDF bila diperlukan |
+| zIndex | 12010, dapat disesuaikan |
+| cMapUrl / standardFontDataUrl | Default asset PDF.js dalam dist |
 
-### 5) Keyboard Shortcuts
-| Tombol      | Fungsi                         |
-|-------------|--------------------------------|
-| ← / →       | Halaman sebelumnya / berikutnya |
-| Home / End  | Halaman pertama / terakhir     |
-| Scroll      | Zoom in/out                    |
-| Esc         | Tutup viewer                   |
+Opsi render/sizing v1 masih diterima, tetapi perilaku numeriknya berubah.
+Lihat [migration notes](docs/release-v2.md) sebelum mengganti production.
 
----
+Keyboard saat stage fokus: ←/→, PageUp/PageDown, Home/End, +/-; Esc menutup
+modal. Engine book juga menyediakan F untuk fullscreen. Tab tetap dalam modal.
 
-## ⚙️ Setup & Quick Start
+## Performance and browser support
 
-**Requirements**
-- Web Server: PHP / Python / Node.js / VS Code Live Server  
-- Browser: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+  
-- Internet (untuk CDN)  
-- Storage: min 50MB untuk PDF
+Build viewer JS+CSS sekitar **21 KiB gzip**, di luar suara dan mesin PDF.
+PDF.js 4.10.38 module+worker sekitar **491 KiB gzip**, lazy-loaded. Gzip dihitung
+lokal; transfer nyata bergantung pada server/CDN. Manifest ukuran/hash berada
+di `dist/manifest.json`. CDN tidak otomatis membuat PDF lebih kecil.
 
-**Struktur Folder**
-```
-flippypdf/
-├── index.html
-├── LICENSE
-├── README.md
-├── dist/
-│   ├── js/
-│   │   └── flippy.min.js
-│   ├── css/
-│   │   └── flippy.min.css
-│   └── sound/
-│       └── turnPage.mp3
-└── example/
-    └── limarayamusic.pdf
-```
+Target: browser evergreen dengan ES2020, module workers, ResizeObserver,
+IntersectionObserver, dan Pointer Events. Legacy build PDF.js membantu browser
+yang belum memiliki API modern tertentu; bukan jaminan untuk IE atau seluruh
+browser lama. Local automation memakai Chromium/Edge. Safari/iOS dan Firefox
+perlu validasi perangkat tersendiri sebelum dijanjikan sebagai tested support.
 
-**Jalankan Server**
-```bash
-# PHP
-php -S localhost:8000
+## Development
 
-# Python 3
-python -m http.server 8000
+Node.js 20+.
 
-# Node.js
-npm install -g http-server
-http-server -p 8000
+```sh
+npm ci
+npm run build
+npm test
+npm run test:types
+npx playwright install chromium
+npm run test:browser
+npm run serve
 ```
 
-**VS Code Live Server**
-- Install extension **Live Server**
-- Right-click `index.html` → **Open with Live Server**
+Demo: http://127.0.0.1:4173. Di Windows yang memiliki Edge, test lokal memakai
+Edge headless. CI memakai Chromium. Source berada di src; build deterministik
+menghasilkan dist, tipe, asset PDF.js, dan manifest. GitHub Pages menyajikan
+demo statis dari index.html / site / dist / example.
 
-**Akses**
-```
-http://localhost:8000
-```
+## Troubleshooting
 
----
+- Gunakan HTTP server, bukan file://.
+- PDF berbeda origin memerlukan CORS; private PDF tetap di endpoint aplikasi.
+- Module dan worker PDF.js harus dari versi yang sama.
+- CDN worker membutuhkan worker-src blob:; lihat panduan CSP pada integrations.
+- Jika loading gagal, viewer memberikan tautan membuka PDF langsung.
+- Source viewer memuat PDF sebagai canvas; fitur PDF.js viewer lengkap tidak tersedia.
 
-## ✨ Fitur Utama
-- 📖 **Book Flip Mode** (3D flip real)  
-- 📜 **Webtoon Mode** (scroll vertikal)  
-- 📄 **Single Mode** (1 halaman per view)  
-- 🔊 Page flip sound  
-- 🌏 Multi-language: **ID / EN / JA / ZH**  
-- 📱 Mobile optimized, gestures & keyboard  
-- 🧭 Sidebar thumbnails, zoom & pan, sharp render
+## License and credits
 
----
-
-## 🌐 Browser Support
-- Chrome 90+ · Firefox 88+ · Safari 14+ · Edge 90+ · Mobile (iOS/Android)
-
----
-
-## 📦 Struktur Project
-```
-flippypdf/
-├── index.html
-├── LICENSE
-├── README.md
-├── dist/
-│   ├── js/
-│   │   └── flippy.min.js
-│   ├── css/
-│   │   └── flippy.min.css
-│   └── sound/
-│       └── turnPage.mp3
-└── example/
-    └── limarayamusic.pdf
-```
-
----
-
-## 🛠️ Customization
-- 🎨 **Ubah warna:** edit di `dist/css/flippy.min.css`  
-- 🔇 **Nonaktifkan suara:** `soundEnabled: false`  
-- 🖼️ **Atur kualitas render:** ubah `scale`, `jpegQuality`, dll
-
----
-
-## 🐛 Troubleshooting
-| Masalah               | Penyebab                          | Solusi                                        |
-|-----------------------|-----------------------------------|-----------------------------------------------|
-| "Gunakan web server"  | Dibuka via `file://`              | Jalankan via server (PHP/Python/Node/Live)    |
-| PDF tidak tampil      | Path salah / file hilang          | Cek `example/limarayamusic.pdf`               |
-| Animasi lag           | RAM/browser lambat                | Turunkan scale, tutup tab, gunakan Chrome     |
-
----
-
-## 📄 License
-**MIT License**  
-Copyright (c) 2025 Bobby Fajar Christian  
-[Full License](LICENSE)
-
----
-
-## 👤 Author
-- Bobby Fajar Christian  
-- Instagram: https://instagram.com/bobbyfajarc  
-- X (Twitter): https://x.com/bobbyfajarc  
-- Jakarta, Indonesia
-
----
-
-## 🙏 Credits
-- PDF.js — https://mozilla.github.io/pdf.js/  
-- Bootstrap 5 — https://getbootstrap.com/  
-- Remix Icons — https://remixicon.com/
-
----
-
-
-<p align="center">Made with ❤️ in Jakarta, Indonesia</p>
+MIT: Bobby Fajar Christian. Book engine berbasis PDFlipbook MIT, Symple NZ.
+PDF.js: Mozilla dan kontributor, Apache-2.0. Lisensi pihak ketiga tetap dibawa
+dalam distribusi; lihat [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

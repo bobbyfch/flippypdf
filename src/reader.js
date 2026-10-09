@@ -1,0 +1,497 @@
+export function createReader(global, engine) {
+    'use strict';
+
+    var active = null;
+
+    function read(key, fallback) {
+        try {
+            var value = global.localStorage.getItem(key);
+            return value === null ? fallback : JSON.parse(value);
+        } catch (e) {
+            return fallback;
+        }
+    }
+
+    function save(key, value) {
+        try { global.localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* private browsing */ }
+    }
+
+    var iconPaths = {
+        bookmarks: ['M6 4.75A1.75 1.75 0 0 1 7.75 3h8.5A1.75 1.75 0 0 1 18 4.75V21l-6-3.75L6 21V4.75Z', 'M9 8h6'],
+        sound: ['M11 5 6 9H3v6h3l5 4V5Z', 'M15.5 8.5a5 5 0 0 1 0 7', 'M18.5 5.5a9 9 0 0 1 0 13'],
+        muted: ['M11 5 6 9H3v6h3l5 4V5Z', 'm16 9 5 6', 'm21 9-5 6'],
+        download: ['M12 3v12', 'm7 10 5 5 5-5', 'M5 21h14'],
+        close: ['m6 6 12 12', 'M18 6 6 18'],
+        open: ['M5 12h14', 'm12 5 7 7-7 7'],
+        bookmark: ['M6 4.75A1.75 1.75 0 0 1 7.75 3h8.5A1.75 1.75 0 0 1 18 4.75V21l-6-3.75L6 21V4.75Z'],
+        bookmarkOff: ['M6 4.75A1.75 1.75 0 0 1 7.75 3h8.5A1.75 1.75 0 0 1 18 4.75V21l-6-3.75L6 21V4.75Z', 'M9 12h6'],
+        page: ['M6 3.75h8l4 4V20a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V3.75Z', 'M14 4v4h4', 'M9 13h6', 'M9 16h6']
+    };
+
+    function makeIcon(name) {
+        var svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('viewBox', '0 0 24 24');
+        svg.setAttribute('aria-hidden', 'true');
+        svg.setAttribute('focusable', 'false');
+        svg.classList.add('library-reader-icon');
+        (iconPaths[name] || []).forEach(function (d) {
+            var path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', d);
+            svg.appendChild(path);
+        });
+        return svg;
+    }
+
+    function button(label, className, iconName, visibleText) {
+        var el = document.createElement('button');
+        el.type = 'button';
+        el.className = className || 'library-reader-button';
+        el.setAttribute('aria-label', label);
+        el.title = label;
+        if (iconName) el.appendChild(makeIcon(iconName));
+        if (visibleText) {
+            var text = document.createElement('span');
+            text.textContent = visibleText;
+            el.appendChild(text);
+        } else if (!iconName) {
+            el.textContent = label;
+        }
+        return el;
+    }
+
+    function close(immediate) {
+        if (!active) return;
+        var state = active;
+        active = null;
+        document.removeEventListener('keydown', state.onKey);
+        if (state.thumbObserver) state.thumbObserver.disconnect();
+        state.thumbQueue = [];
+        if (state.thumbTasks) state.thumbTasks.forEach(function (task) { task.cancel(); });
+        if (state.book) state.book.destroy();
+        if (state.options.onClose) state.options.onClose();
+        if (state.soundFile) {
+            state.soundFile.pause();
+            state.soundFile.currentTime = 0;
+        }
+        if (immediate || (global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+            state.overlay.remove();
+        } else {
+            state.overlay.classList.add('is-closing');
+            state.overlay.setAttribute('aria-hidden', 'true');
+            var removeOverlay = function () {
+                if (state.overlay.parentNode) state.overlay.remove();
+            };
+            state.overlay.addEventListener('transitionend', function onTransition(event) {
+                if (event.target !== state.overlay || event.propertyName !== 'opacity') return;
+                state.overlay.removeEventListener('transitionend', onTransition);
+                removeOverlay();
+            });
+            global.setTimeout(removeOverlay, 240);
+        }
+        document.body.style.overflow = state.previousOverflow;
+        if (state.trigger && document.contains(state.trigger)) state.trigger.focus();
+    }
+
+    function open(options) {
+        if (!engine || !options || (!options.url && !options.data)) {
+            return Promise.reject(new Error('Pembaca tidak tersedia'));
+        }
+        close(true);
+
+        var key = (options.storagePrefix || 'flippy:') + String(options.id || options.url || 'bytes');
+        var state = {
+            options: options,
+            trigger: options.trigger || document.activeElement,
+            previousOverflow: document.body.style.overflow,
+            book: null,
+            pages: 0,
+            current: 1,
+            marks: read(key + ':marks', []),
+            sound: options.soundEnabled === undefined ? read((options.storagePrefix || 'flippy:') + 'sound', !(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches)) : !!options.soundEnabled,
+            soundFile: null,
+            thumbObserver: null,
+            thumbQueue: [],
+            thumbRenders: 0,
+            thumbRecent: [],
+            thumbTasks: new Set()
+        };
+        if (!Array.isArray(state.marks)) state.marks = [];
+
+        var overlay = document.createElement('div');
+        overlay.className = 'library-reader-overlay is-entering';
+        overlay.dataset.flippyTheme = options.theme || 'auto';
+        if (options.zIndex) overlay.style.zIndex = String(options.zIndex);
+        overlay.setAttribute('role', 'dialog');
+        overlay.setAttribute('aria-modal', 'true');
+        overlay.setAttribute('aria-label', 'Pembaca e-book: ' + (options.title || 'E-book'));
+        var shell = document.createElement('div');
+        shell.className = 'library-reader-shell';
+        overlay.appendChild(shell);
+
+        var header = document.createElement('header');
+        header.className = 'library-reader-header';
+        var title = document.createElement('h2');
+        title.className = 'library-reader-title';
+        title.textContent = options.title || 'E-book';
+        header.appendChild(title);
+        var actions = document.createElement('div');
+        actions.className = 'library-reader-actions';
+        var marksButton = button('Tampilkan penanda dan pratinjau halaman', null, 'bookmarks');
+        marksButton.setAttribute('aria-expanded', 'false');
+        var soundButton = button('Aktifkan suara halaman', null, 'muted');
+        var download = document.createElement('a');
+        download.className = 'library-reader-button';
+        download.setAttribute('aria-label', 'Unduh PDF');
+        download.title = 'Unduh PDF';
+        download.appendChild(makeIcon('download'));
+        download.href = options.url || '#';
+        if (!options.url) download.hidden = true;
+        download.setAttribute('download', ((options.title || 'ebook').replace(/[\\/:*?"<>|]/g, '').trim().slice(0, 80) || 'ebook') + '.pdf');
+        var closeButton = button('Tutup pembaca', 'library-reader-button library-reader-close', 'close');
+        actions.appendChild(marksButton);
+        actions.appendChild(soundButton);
+        actions.appendChild(download);
+        actions.appendChild(closeButton);
+        header.appendChild(actions);
+        shell.appendChild(header);
+
+        var content = document.createElement('div');
+        content.className = 'library-reader-content';
+        var stage = document.createElement('div');
+        stage.className = 'library-reader-stage';
+        var bookHost = document.createElement('div');
+        bookHost.className = 'library-reader-book';
+        stage.appendChild(bookHost);
+        content.appendChild(stage);
+        var sidebar = document.createElement('aside');
+        sidebar.className = 'library-reader-sidebar';
+        sidebar.hidden = true;
+        var sidebarTitle = document.createElement('h3');
+        sidebarTitle.textContent = 'Penanda halaman';
+        var marksList = document.createElement('div');
+        marksList.className = 'library-reader-marks';
+        var thumbsTitle = document.createElement('h3');
+        thumbsTitle.textContent = 'Pratinjau halaman';
+        var thumbsList = document.createElement('div');
+        thumbsList.className = 'library-reader-thumbs';
+        sidebar.appendChild(sidebarTitle);
+        sidebar.appendChild(marksList);
+        sidebar.appendChild(thumbsTitle);
+        sidebar.appendChild(thumbsList);
+        content.appendChild(sidebar);
+        shell.appendChild(content);
+
+        var footer = document.createElement('footer');
+        footer.className = 'library-reader-footer';
+        var progress = document.createElement('input');
+        progress.type = 'range';
+        progress.min = '1';
+        progress.max = '1';
+        progress.value = '1';
+        progress.disabled = true;
+        progress.setAttribute('aria-label', 'Posisi halaman');
+        var pageForm = document.createElement('form');
+        pageForm.className = 'library-reader-page-form';
+        var label = document.createElement('label');
+        label.textContent = 'Halaman ';
+        var pageInput = document.createElement('input');
+        pageInput.type = 'number';
+        pageInput.min = '1';
+        pageInput.value = '1';
+        pageInput.inputMode = 'numeric';
+        label.appendChild(pageInput);
+        var total = document.createElement('span');
+        total.textContent = ' / …';
+        var goButton = button('Lanjut atau buka halaman', null, 'open');
+        goButton.type = 'submit';
+        pageForm.appendChild(label);
+        pageForm.appendChild(total);
+        pageForm.appendChild(goButton);
+        var bookmarkButton = button('Tandai halaman ini', null, 'bookmark');
+        bookmarkButton.setAttribute('aria-pressed', 'false');
+        footer.appendChild(progress);
+        footer.appendChild(pageForm);
+        footer.appendChild(bookmarkButton);
+        shell.appendChild(footer);
+
+        function updateMarks() {
+            marksList.replaceChildren();
+            var marks = state.marks.filter(function (n) { return Number.isInteger(n) && n >= 1 && (!state.pages || n <= state.pages); }).sort(function (a, b) { return a - b; });
+            if (!marks.length) {
+                var empty = document.createElement('p');
+                empty.textContent = 'Belum ada halaman yang ditandai.';
+                marksList.appendChild(empty);
+            }
+            marks.forEach(function (page) {
+                var item = button('Buka halaman ' + page, 'library-reader-bookmark-item', 'page', String(page));
+                item.addEventListener('click', function () {
+                    if (state.book) state.book.goTo(page);
+                    sidebar.hidden = true;
+                    marksButton.setAttribute('aria-expanded', 'false');
+                });
+                marksList.appendChild(item);
+            });
+            var marked = marks.indexOf(state.current) !== -1;
+            bookmarkButton.setAttribute('aria-pressed', marked ? 'true' : 'false');
+            var label = marked ? 'Hapus penanda halaman ini' : 'Tandai halaman ini';
+            bookmarkButton.setAttribute('aria-label', label);
+            bookmarkButton.title = label;
+            bookmarkButton.replaceChildren(makeIcon(marked ? 'bookmarkOff' : 'bookmark'));
+        }
+
+        function updatePage(page) {
+            state.current = Math.max(1, Math.min(state.pages || 1, Number(page) || 1));
+            pageInput.value = String(state.current);
+            progress.value = String(state.current);
+            save(key + ':page', state.current);
+            updateMarks();
+            if (state.currentThumb) state.currentThumb.removeAttribute('aria-current');
+            state.currentThumb = thumbsList.querySelector('[data-page="' + state.current + '"]');
+            if (state.currentThumb) state.currentThumb.setAttribute('aria-current', 'page');
+        }
+
+        function pumpThumbs() {
+            while (active === state && state.book && state.book.pdf && state.thumbRenders < 2 && state.thumbQueue.length) {
+                (function (job) {
+                    state.thumbRenders++;
+                    state.book.pdf.getPage(job.page).then(function (pdfPage) {
+                        if (active !== state) return;
+                        var size = pdfPage.getViewport({ scale: 1 });
+                        var viewport = pdfPage.getViewport({ scale: 90 / size.width });
+                        job.canvas.width = Math.ceil(viewport.width);
+                        job.canvas.height = Math.ceil(viewport.height);
+                        var task = pdfPage.render({ canvasContext: job.canvas.getContext('2d'), viewport: viewport });
+                        state.thumbTasks.add(task);
+                        return task.promise.finally(function () { state.thumbTasks.delete(task); });
+                    }).then(function () {
+                        if (active !== state) return;
+                        job.canvas.dataset.ready = '1';
+                        state.thumbRecent.push(job.canvas);
+                        if (state.thumbRecent.length > 40) {
+                            var old = state.thumbRecent.shift();
+                            old.width = 1;
+                            old.height = 1;
+                            delete old.dataset.ready;
+                        }
+                    }).catch(function () { /* pratinjau tidak menghalangi baca PDF */ }).then(function () {
+                        state.thumbRenders--;
+                        job.canvas.dataset.queued = '';
+                        pumpThumbs();
+                    });
+                })(state.thumbQueue.shift());
+            }
+        }
+
+        function queueThumb(canvas) {
+            if (!state.book || !state.book.pdf || canvas.dataset.ready || canvas.dataset.queued) return;
+            canvas.dataset.queued = '1';
+            state.thumbQueue.push({ page: Number(canvas.parentNode.dataset.page), canvas: canvas });
+            pumpThumbs();
+        }
+
+        function buildThumbs() {
+            if (state.thumbsBuilt || !state.pages) return;
+            state.thumbsBuilt = true;
+            if (state.pages > 1000) {
+                var notice = document.createElement('p');
+                notice.textContent = 'Gunakan nomor halaman untuk dokumen yang sangat panjang.';
+                thumbsList.appendChild(notice);
+                return;
+            }
+            var fragment = document.createDocumentFragment();
+            for (var page = 1; page <= state.pages; page++) {
+                (function (number) {
+                    var item = button('', 'library-reader-thumb');
+                    item.dataset.page = String(number);
+                    item.setAttribute('aria-label', 'Pratinjau halaman ' + number);
+                    item.title = 'Halaman ' + number;
+                    var canvas = document.createElement('canvas');
+                    canvas.setAttribute('aria-hidden', 'true');
+                    var caption = document.createElement('span');
+                    caption.textContent = String(number);
+                    item.appendChild(canvas);
+                    item.appendChild(caption);
+                    item.addEventListener('click', function () {
+                        state.book.goTo(number);
+                        sidebar.hidden = true;
+                        marksButton.setAttribute('aria-expanded', 'false');
+                    });
+                    fragment.appendChild(item);
+                })(page);
+            }
+            thumbsList.appendChild(fragment);
+            if ('IntersectionObserver' in global) {
+                state.thumbObserver = new IntersectionObserver(function (entries) {
+                    entries.forEach(function (entry) {
+                        if (entry.isIntersecting) queueThumb(entry.target);
+                    });
+                }, { root: sidebar, rootMargin: '100px' });
+                thumbsList.querySelectorAll('canvas').forEach(function (canvas) {
+                    state.thumbObserver.observe(canvas);
+                });
+            } else {
+                thumbsList.querySelectorAll('canvas').forEach(function (canvas, index) {
+                    if (index < 12) queueThumb(canvas);
+                });
+            }
+            updatePage(state.current);
+        }
+
+        function updateSound() {
+            var label = state.sound ? 'Matikan suara halaman' : 'Aktifkan suara halaman';
+            soundButton.setAttribute('aria-label', label);
+            soundButton.title = label;
+            soundButton.replaceChildren(makeIcon(state.sound ? 'sound' : 'muted'));
+            soundButton.setAttribute('aria-pressed', state.sound ? 'true' : 'false');
+        }
+
+        function fallback(error) {
+            if (state.thumbObserver) state.thumbObserver.disconnect();
+            state.thumbQueue = [];
+            if (state.book) state.book.destroy();
+            state.book = null;
+            if (options.onError) options.onError(error || new Error('Could not load PDF'));
+            marksButton.disabled = true;
+            soundButton.disabled = true;
+            footer.hidden = true;
+            bookHost.replaceChildren();
+            var message = document.createElement('div');
+            message.className = 'library-reader-fallback';
+            var text = document.createElement('p');
+            var unavailable = error && /missing pdf|unexpected server response|invalid pdf|failed to fetch|http response/i.test(String(error.message || error));
+            text.textContent = unavailable
+                ? 'Berkas PDF tidak dapat dimuat. Periksa koneksi atau coba lagi.'
+                : 'Efek buku tidak tersedia di browser ini. Anda dapat mencoba membuka PDF langsung.';
+            var link = document.createElement('a');
+            link.href = options.url || '#';
+            if (!options.url) link.hidden = true;
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.textContent = 'Buka PDF';
+            message.appendChild(text);
+            message.appendChild(link);
+            bookHost.appendChild(message);
+        }
+
+        state.onKey = function (event) {
+            if (event.key === 'Escape') { event.preventDefault(); close(); return; }
+            if (event.key !== 'Tab') return;
+            var focusable = Array.prototype.filter.call(overlay.querySelectorAll('button:not([disabled]), a[href], input:not([disabled])'), function (node) {
+                return !node.closest('[hidden]');
+            });
+            if (!focusable.length) return;
+            var first = focusable[0], last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+            else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+        };
+
+        closeButton.addEventListener('click', function () { close(); });
+        overlay.addEventListener('click', function (event) { if (event.target === overlay) close(); });
+        marksButton.addEventListener('click', function () {
+            sidebar.hidden = !sidebar.hidden;
+            marksButton.setAttribute('aria-expanded', sidebar.hidden ? 'false' : 'true');
+            if (!sidebar.hidden) buildThumbs();
+        });
+        soundButton.addEventListener('click', function () {
+            state.sound = !state.sound;
+            save((options.storagePrefix || 'flippy:') + 'sound', state.sound);
+            updateSound();
+        });
+        bookmarkButton.addEventListener('click', function () {
+            var index = state.marks.indexOf(state.current);
+            if (index === -1) state.marks.push(state.current);
+            else state.marks.splice(index, 1);
+            save(key + ':marks', state.marks);
+            updateMarks();
+        });
+        pageForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            var page = Number(pageInput.value);
+            if (!state.book || !Number.isInteger(page) || page < 1 || page > state.pages) {
+                pageInput.value = String(state.current);
+                return;
+            }
+
+            // The arrow doubles as Next when the input still shows the current
+            // page. Otherwise it opens the page the user entered.
+            if (page === state.book.currentPage()) state.book.next();
+            else state.book.goTo(page);
+        });
+        progress.addEventListener('change', function () {
+            if (state.book) state.book.goTo(Number(progress.value));
+        });
+        bookHost.addEventListener('flipbook:ready', function (event) {
+            if (active !== state) return;
+            state.pages = event.detail.pages;
+            progress.max = String(state.pages);
+            progress.disabled = false;
+            pageInput.max = String(state.pages);
+            total.textContent = ' / ' + state.pages;
+            updatePage(state.book.currentPage());
+            if (!sidebar.hidden) buildThumbs();
+            if (document.activeElement === closeButton) bookHost.focus();
+            if (options.onReady) options.onReady(state);
+        });
+        bookHost.addEventListener('flipbook:pagechange', function (event) {
+            if (active !== state) return;
+            updatePage(event.detail.page);
+            if (options.onPageChange) options.onPageChange(event.detail.page);
+            if (state.sound && options.soundUrl) {
+                if (!state.soundFile) state.soundFile = new Audio(options.soundUrl);
+                state.soundFile.currentTime = 0;
+                var play = state.soundFile.play();
+                if (play && play.catch) play.catch(function () {});
+            }
+        });
+        bookHost.addEventListener('flipbook:pageerror', function (event) {
+            if (active === state && options.onPageError) options.onPageError(event.detail);
+        });
+        bookHost.addEventListener('flipbook:error', function (event) {
+            if (active === state) fallback(event.detail && event.detail.error);
+        });
+
+        document.body.appendChild(overlay);
+        document.body.style.overflow = 'hidden';
+        document.addEventListener('keydown', state.onKey);
+        active = state;
+        state.overlay = overlay;
+        if (!(global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+            global.requestAnimationFrame(function () {
+                if (active === state) overlay.classList.remove('is-entering');
+            });
+        } else {
+            overlay.classList.remove('is-entering');
+        }
+        updateSound();
+        updateMarks();
+        closeButton.focus();
+
+        try {
+            state.book = engine.create(bookHost, {
+                url: options.url,
+                data: options.data,
+                httpHeaders: options.httpHeaders,
+                withCredentials: options.withCredentials,
+                password: options.password,
+                cMapUrl: options.cMapUrl,
+                standardFontDataUrl: options.standardFontDataUrl,
+                pdfjsLib: options.pdfjsLib,
+                startPage: options.startPage || Number(read(key + ':page', 1)) || 1,
+                pdfjsSrc: options.pdfjsSrc,
+                pdfWorkerSrc: options.pdfWorkerSrc,
+                pdfjsLegacySrc: options.pdfjsLegacySrc,
+                pdfjsLegacyWorkerSrc: options.pdfjsLegacyWorkerSrc,
+                cornerFold: true,
+                displayMode: options.mode === 'single' ? 'single' : 'auto',
+                maxScale: options.maxScale || options.scale || 1.75,
+                maxCanvasPixels: options.maxCanvasPixels || 2500000,
+                duration: (global.matchMedia && global.matchMedia('(prefers-reduced-motion: reduce)').matches) ? 0 : (options.duration === undefined ? 560 : options.duration)
+            });
+        } catch (error) {
+            fallback(error);
+        }
+        return Promise.resolve();
+    }
+
+    return { open: open, close: close, getState: function () { return active; } };
+}
