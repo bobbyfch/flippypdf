@@ -1,13 +1,15 @@
-# FlippyPDF → Sela
+# FlippyPDF 1.0 — legacy archive
 
-This repository is retired and archived. Development continues at **[bobbyfch/sela](https://github.com/bobbyfch/sela)**.
+[![Continue with Sela](https://img.shields.io/badge/Continue_with-Sela-236947?style=for-the-badge)](https://bobbyfch.github.io/sela/#products)
 
-[![Open Sela](https://img.shields.io/badge/read-Sela-236947?style=for-the-badge)](https://bobbyfch.github.io/sela/) [![Install viewer](https://img.shields.io/badge/install-CDN_viewer-236947?style=for-the-badge)](https://bobbyfch.github.io/sela/#install-viewer) [![Extension releases](https://img.shields.io/github/v/release/bobbyfch/sela?style=for-the-badge&color=236947)](https://github.com/bobbyfch/sela/releases/latest)
+This repository preserves the original **FlippyPDF v1.0.0** viewer assets. The main branch restores that release, with a new migration notice and public landing page. Historical tags remain unchanged; the mistaken v3.0.0 release/tag was removed. Git history and original release files are backed up locally by the maintainer.
 
-Use Sela for new integrations and migrate active FlippyPDF consumers. The mistaken Sela v3 release/tag in this repository has been removed; Sela starts at 1.0.0 in its own release namespace. Local recovery backups retain the full Git history and original v3 extension packages.
+**For new integrations, visit [Sela](https://bobbyfch.github.io/sela/).** Choose Sela Viewer (CDN / frameworks), Sela Home (desktop new-tab extension), or Sela Bookshelf (mobile web app). [Installation](https://github.com/bobbyfch/sela/blob/main/docs/install.md) · [Releases](https://github.com/bobbyfch/sela/releases/latest)
 
-FlippyPDF CDN distribution is retired and unsupported. Public bytes already cached by third-party CDNs cannot be recalled; archiving does not revoke historical URLs. The legacy Pages address directs readers to Sela.
+FlippyPDF 1.0 is retained for historical compatibility, not maintained as a modern production reader. It may rely on older external resources. Previously published CDN caches cannot be recalled. Use version-pinned Sela for active projects.
 
-[Installation and framework integrations](https://github.com/bobbyfch/sela/blob/main/docs/integrations.md) · [Migration](https://github.com/bobbyfch/sela/blob/main/docs/migration.md) · [Format support](https://github.com/bobbyfch/sela/blob/main/docs/formats.md)
+## Bahasa Indonesia
 
-MIT copyright and upstream notices remain applicable. Created by [Bobby Fajar Christian](https://bobbyfajarc.github.io/).
+Repo ini dikembalikan ke aset asli **FlippyPDF 1.0.0**. README dan halaman publik mengarahkan penggunaan baru ke **Sela**: Viewer CDN, Home untuk new tab desktop, atau Bookshelf app mobile. Tag historis tidak diubah. Repo tetap menjadi arsip; migrasikan integrasi aktif ke Sela.
+
+MIT · Bobby Fajar Christian · [Author](https://bobbyfajarc.github.io/)

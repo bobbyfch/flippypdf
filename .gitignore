@@ -1,7 +1,0 @@
-node_modules/
-test-results/
-playwright-report/
-.pages/
-*.tgz
-docs/audit-2026-10-09.md
-docs/migration-contract.md

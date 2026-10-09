@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /flippypdf/
-Sitemap: https://bobbyfch.github.io/flippypdf/sitemap.xml
