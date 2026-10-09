@@ -18,14 +18,14 @@ Do not move private PDFs into GitHub Pages.
 This repo is not automatically published to npm. Install from the GitHub tag:
 
 ```sh
-npm install github:bobbyfch/flippypdf#v2.0.0
+npm install github:bobbyfch/flippypdf#v2.1.0
 ```
 
 ```ts
 import Flippy, { type FlippyOptions } from 'flippypdf';
 const options: FlippyOptions = {
   pdfUrl: '/api/ebook/42',
-  assetBase: 'https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.0.0/dist/'
+  assetBase: 'https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.1.0/dist/'
 };
 const viewer = new Flippy(options);
 await viewer.open();
@@ -85,3 +85,9 @@ weaken an existing app's CSP blindly; self-host the full `dist` folder and
 configure your policy appropriately. `autoStyles:false` lets the app include
 the shell stylesheet itself. Full offline use also requires a reachable or
 cached PDF and all referenced PDF.js assets.
+
+## Additional client frameworks
+
+Examples: [React](../examples/react.tsx), [Svelte](../examples/svelte.svelte), [Angular](../examples/angular.ts), [Astro](../examples/astro.astro), [Web Component](../examples/web-component.js). They own one viewer and destroy it when removed. Examples are integration recipes; only the existing Vue adapter and core are exercised against a real framework in this repository. Test your framework version and router lifecycle in your app.
+
+For React/Next, use a client component; for Nuxt/SvelteKit/Angular SSR, call open only after mount or a browser click. Imports are SSR-safe. CSS-framework choice is independent of the reader. Web Components use standard DOM APIs without extra runtime.

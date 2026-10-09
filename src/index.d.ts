@@ -1,4 +1,4 @@
-export type FlippyMode = 'book' | 'single' | 'webtoon';
+export type FlippyMode = 'book' | 'single' | 'webtoon' | 'manga';
 export interface FlippyOptions {
   pdfUrl?: string;
   url?: string;
@@ -6,6 +6,8 @@ export interface FlippyOptions {
   title?: string;
   mode?: FlippyMode;
   theme?: 'auto' | 'light' | 'dark';
+  filter?: 'none' | 'grayscale' | 'sepia' | 'contrast' | 'warm' | 'cool';
+  readingDirection?: 'ltr' | 'rtl';
   startPage?: number;
   id?: string | number;
   trigger?: HTMLElement;
@@ -66,6 +68,7 @@ export declare class Flippy extends EventTarget {
   zoomOut(): this;
   setZoom(value: number): this;
   toggleFullscreen(): this;
+  setFilter(value: NonNullable<FlippyOptions['filter']>): this;
 }
 export declare const VERSION: string;
 export default Flippy;

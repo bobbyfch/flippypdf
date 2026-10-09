@@ -12,6 +12,12 @@ test('ESM import and constructor are safe without a DOM for SSR', async () => {
 });
 test('invalid modes and schemes fail explicitly', () => {
   assert.throws(() => new Flippy({ mode: 'unknown' }), /mode must/);
+  assert.throws(() => new Flippy({ filter: 'unknown' }), /Unknown reading filter/);
+  assert.throws(() => new Flippy({ readingDirection: 'unknown' }), /readingDirection/);
+  const manga = new Flippy({ mode: 'manga' });
+  assert.equal(manga.setFilter('grayscale'), manga);
+  assert.equal(manga.options.filter, 'grayscale');
+  assert.throws(() => manga.setFilter('url(javascript:bad)'), /Unknown reading filter/);
   assert.throws(() => safeUrl('javascript:alert(1)', 'https://example.com'), /Only HTTP/);
   assert.throws(() => safeUrl('data:text/html,hi', 'https://example.com'), /Only HTTP/);
   assert.equal(safeUrl('/media/ebook/42?token=abc', 'https://example.com'), 'https://example.com/media/ebook/42?token=abc');

@@ -193,3 +193,13 @@
 .flippy-webtoon-tools { position:sticky; top:0; z-index:4; display:flex; justify-content:flex-end; gap:8px; margin-bottom:12px; pointer-events:none; }
 .flippy-webtoon-tools button { pointer-events:auto; }
 @media(prefers-reduced-motion:reduce) { .library-reader-overlay *, .library-reader-overlay *::before, .library-reader-overlay *::after { animation-duration:.01ms!important; transition-duration:.01ms!important; scroll-behavior:auto!important; } }
+
+/* Filters apply to document pixels only, including thumbnails. */
+.library-reader-overlay canvas{filter:var(--flippy-page-filter,none)}
+.flippy-filter{font:inherit;font-size:12px;max-width:150px;color:var(--flippy-fg);background:var(--flippy-bg);border:1px solid var(--flippy-border);border-radius:8px;padding:7px}
+.fb-rtl canvas{scale:-1 1}
+.fb-rtl .fb-nav-prev{left:auto;right:10px}
+.fb-rtl .fb-nav-next{right:auto;left:10px}
+@media(max-width:480px){.flippy-filter{max-width:85px;font-size:10px;padding:5px}.library-reader-actions{gap:3px}}
+
+.fb-rtl .fb-nav svg{transform:rotate(180deg)}

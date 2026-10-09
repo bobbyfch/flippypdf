@@ -1,41 +1,36 @@
 <!doctype html>
-<html lang="id">
+<html lang="en" data-theme="auto">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="FlippyPDF: pembaca PDF dengan book flip, webtoon, dan single page. Tanpa Bootstrap, dengan PDF.js yang dimuat otomatis.">
-  <title>FlippyPDF · Read at your own pace</title>
-  <link rel="icon" href="favicon.png">
-  <link rel="stylesheet" href="site/demo.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light dark">
+<title>FlippyPDF — Lightweight PDF flipbook, manga & webtoon reader</title>
+<meta name="description" content="Free open-source JavaScript PDF reader with book flip, manga RTL, webtoon, bookmarks and reading filters. Works with PHP, Laravel, Vue, React and TypeScript.">
+<meta name="robots" content="index,follow,max-image-preview:large"><meta name="theme-color" content="#236947">
+<link rel="canonical" href="https://bobbyfch.github.io/flippypdf/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="FlippyPDF"><meta property="og:title" content="FlippyPDF — Your PDF. Your reading rhythm."><meta property="og:description" content="Four reading modes. No Bootstrap. Lazy PDF engine. An open-source reader for your next project."><meta property="og:url" content="https://bobbyfch.github.io/flippypdf/"><meta property="og:image" content="https://bobbyfch.github.io/flippypdf/site/social.png"><meta property="og:image:alt" content="FlippyPDF, an open-source PDF reader with a green bird logo"><meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:locale" content="en_US"><meta property="og:locale:alternate" content="id_ID">
+<meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="FlippyPDF — Read at your own pace"><meta name="twitter:description" content="Book, manga, webtoon and single-page PDF reading. Framework independent."><meta name="twitter:image" content="https://bobbyfch.github.io/flippypdf/site/social.png">
+<link rel="icon" href="favicon.svg" type="image/svg+xml"><link rel="alternate icon" href="favicon.png"><link rel="stylesheet" href="site/demo.css">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"FlippyPDF","applicationCategory":"DeveloperApplication","operatingSystem":"Any OS with a supported web browser","softwareVersion":"2.1.0","url":"https://bobbyfch.github.io/flippypdf/","downloadUrl":"https://github.com/bobbyfch/flippypdf/releases","codeRepository":"https://github.com/bobbyfch/flippypdf","license":"https://opensource.org/license/mit","description":"Open-source JavaScript PDF reader with book, single, webtoon and right-to-left manga modes. PDF.js loads on demand.","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"author":{"@type":"Person","name":"Bobby Fajar Christian"}}</script>
 </head>
 <body>
-  <header class="nav"><a class="brand" href="#"><img src="logo.svg" alt="" width="32" height="32"> FlippyPDF <span>2.0</span></a><a href="https://github.com/bobbyfch/flippypdf">GitHub ↗</a></header>
-  <main>
-    <section class="hero"><p class="eyebrow">A LITTLE LESS SETUP. A LOT MORE READING.</p><h1>Your PDF.<br>Your reading rhythm.</h1><p class="intro">Buka buku, gulir cerita, atau fokus pada satu halaman.<br>Satu viewer untuk aplikasi PHP, Vue, dan JavaScript.</p><div class="pills"><span>Vanilla JavaScript</span><span>No Bootstrap</span><span>Lazy PDF engine</span><span>TypeScript ready</span></div></section>
-    <section class="demo" aria-labelledby="demo-heading">
-      <div class="section-heading"><div><p class="eyebrow">TRY IT HERE</p><h2 id="demo-heading">Pilih cara membaca.</h2></div><label>Theme <select id="theme"><option value="auto">Auto</option><option value="light">Light</option><option value="dark">Dark</option></select></label></div>
-      <div class="cards">
-        <button class="mode-card" data-mode="book"><span class="card-art book-art" aria-hidden="true"><span></span><span></span></span><span class="card-number">01 / BOOK</span><strong>Turn the page.</strong><span>Lipatan sudut, bayangan kertas, dan navigasi yang terasa seperti buku.</span><b>Buka book flip ↗</b></button>
-        <button class="mode-card" data-mode="webtoon"><span class="card-art scroll-art" aria-hidden="true"><span></span><span></span><span></span></span><span class="card-number">02 / WEBTOON</span><strong>Follow the story.</strong><span>Gulir vertikal. Halaman di sekitar layar dirender saat dibutuhkan.</span><b>Buka webtoon ↗</b></button>
-        <button class="mode-card" data-mode="single"><span class="card-art single-art" aria-hidden="true"><span></span></span><span class="card-number">03 / SINGLE</span><strong>One page at a time.</strong><span>Satu halaman untuk fokus membaca, termasuk pada layar kecil.</span><b>Buka single page ↗</b></button>
-      </div>
-      <div class="upload"><label for="pdf-file">Atau coba PDF milikmu <input id="pdf-file" type="file" accept="application/pdf,.pdf"></label><p>File pilihanmu dibaca di browser; tidak diunggah ke server.</p></div>
-      <p id="status" role="status" aria-live="polite">Demo memakai example/limarayamusic.pdf.</p>
-    </section>
-    <section class="install"><div><p class="eyebrow">DROP IT INTO YOUR STACK</p><h2>Dua tag.<br>Lalu mulai membaca.</h2><p>Flippy mengurus mesin PDF.js secara internal. Ikon SVG dan style terisolasi membuatnya mudah dipakai bersama Bootstrap atau Tailwind.</p><a href="https://github.com/bobbyfch/flippypdf#readme">Dokumentasi & integrasi ↗</a></div><pre><code>&lt;link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.0.0/dist/css/flippy.min.css"&gt;
-&lt;script src="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.0.0/dist/js/flippy.min.js"&gt;&lt;/script&gt;
+<header class="nav"><a class="brand" href="#"><img src="logo.svg" alt="FlippyPDF bird" width="36" height="36"> FlippyPDF <span>2.1</span></a><div class="nav-actions"><label><span class="sr-only" data-i18n="themeLabel">Appearance</span><select id="theme" aria-label="Appearance"><option value="auto">System</option><option value="light">Light</option><option value="dark">Dark</option></select></label><label><span class="sr-only">Language</span><select id="language" aria-label="Language"><option value="en">EN</option><option value="id">ID</option></select></label><a href="https://github.com/bobbyfch/flippypdf" aria-label="FlippyPDF on GitHub">GitHub ↗</a></div></header>
+<main>
+<section class="hero"><div><p class="eyebrow" data-i18n="eyebrow">SMALL SETUP. BIG STORIES.</p><h1 data-i18n="headline">Your PDF.<br>Your reading rhythm.</h1><p class="intro" data-i18n="intro">Turn a page. Follow a story. Find your focus.<br>A little green reader that feels at home in your app.</p><div class="pills"><span>Vanilla JS</span><span>No Bootstrap</span><span>Lazy PDF.js</span><span>TypeScript</span></div><a class="hero-link" href="#demo-heading" data-i18n="try">Try the reader ↓</a></div><a class="story-preview" href="example/limarayamusic.pdf"><img src="example/story/cover.jpg" width="768" height="512" fetchpriority="high" alt="Three friends approaching a village library under a banyan tree"><span><small data-i18n="original">AN ORIGINAL ILLUSTRATED SHORT STORY</small><strong>Limaraya</strong><em data-i18n="storySub">Rumah untuk cerita yang belum selesai</em></span></a></section>
+<section class="demo" aria-labelledby="demo-heading"><div class="section-heading"><div><p class="eyebrow" data-i18n="demoEyebrow">MAKE YOURSELF COMFORTABLE</p><h2 id="demo-heading" data-i18n="demoHeading">Four ways into a story.</h2></div><span class="version-note" data-i18n="lazy">PDF engine loads only when you read.</span></div>
+<div class="cards">
+<button class="mode-card" data-mode="book"><span class="card-art"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M32 17C23 10 12 11 8 14v36c8-4 16-3 24 3 8-6 16-7 24-3V14c-8-4-16-3-24 3Zm0 0v36M15 22l10 3m-10 5 10 3m14-8 10-3m-10 11 10-3"/></svg></span><span class="card-number">01 / BOOK</span><strong data-i18n="bookTitle">Turn the page.</strong><span data-i18n="bookText">Paper folds, gentle shadows and a familiar two-page spread.</span><b data-i18n="read">Start reading ↗</b></button>
+<button class="mode-card" data-mode="webtoon"><span class="card-art scroll-art"><svg viewBox="0 0 64 64" aria-hidden="true"><rect x="16" y="5" width="32" height="20" rx="3"/><rect x="16" y="31" width="32" height="17" rx="3"/><path d="M32 52v10m-5-5 5 5 5-5M22 12h20m-20 6h13m-13 20h20"/></svg></span><span class="card-number">02 / WEBTOON</span><strong data-i18n="webtoonTitle">Follow the story.</strong><span data-i18n="webtoonText">Vertical reading with nearby pages rendered as you scroll.</span><b data-i18n="read">Start reading ↗</b></button>
+<button class="mode-card" data-mode="single"><span class="card-art single-art"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M16 6h23l10 11v40H16Zm23 0v12h10M23 28h19m-19 8h19m-19 8h12"/></svg></span><span class="card-number">03 / SINGLE</span><strong data-i18n="singleTitle">Just this page.</strong><span data-i18n="singleText">One page, less distraction. A natural fit for small screens.</span><b data-i18n="read">Start reading ↗</b></button>
+<button class="mode-card" data-mode="manga"><span class="card-art manga-art"><svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 12h48v42H8Zm24 0v42M8 32h24m0-8h24M45 4H18m6-4-6 4 6 4M39 32l10 6-10 8Z"/></svg></span><span class="card-number">04 / MANGA · RTL</span><strong data-i18n="mangaTitle">Read from the right.</strong><span data-i18n="mangaText">Right-to-left page turns and arrow keys. Keep original page order.</span><b data-i18n="read">Start reading ↗</b></button>
+</div><div class="upload"><label for="pdf-file"><span data-i18n="upload">Or bring your own PDF</span><input id="pdf-file" type="file" accept="application/pdf,.pdf"></label><p data-i18n="privacy">Your file stays in your browser. No upload, account or tracking.</p><a href="example/limarayamusic.pdf" data-i18n="download">Download the 8-page Limaraya story ↗</a></div><p id="status" role="status" aria-live="polite"></p><noscript><p>JavaScript is disabled. <a href="example/limarayamusic.pdf">Read or download Limaraya as a PDF.</a></p></noscript></section>
+<section class="install"><div><p class="eyebrow">PLUG IN. READ ON.</p><h2 data-i18n="installTitle">At home in your stack.</h2><p data-i18n="installText">CI3, Laravel, Vue, React, Svelte, Astro or plain HTML. Bring your own design system: Bootstrap and Tailwind are welcome, neither is required.</p><a href="https://github.com/bobbyfch/flippypdf#quick-start" data-i18n="docs">Installation & integration guide ↗</a></div><pre><code>&lt;script src="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.1.0/dist/js/flippy.compat.js"&gt;&lt;/script&gt;
 
-const viewer = new Flippy({
-  pdfUrl: '/media/ebook/42',
-  title: 'My book',
-  mode: 'book',
-  theme: 'auto'
+// Modern browsers: await FlippyReady first.
+const reader = new Flippy({
+  pdfUrl: '/story.pdf', mode: 'manga',
+  theme: 'auto', filter: 'grayscale'
 });
-viewer.open();</code></pre></section>
-    <section class="notes"><h2>Made to fit in.</h2><div><article><h3>Keep your PDF private.</h3><p>Asset viewer dapat dimuat dari CDN. PDF tetap di endpoint aplikasi dengan sesi dan otorisasi milikmu.</p></article><article><h3>Load when it matters.</h3><p>PDF.js, worker, dan suara dimuat saat diperlukan. Tidak ada Bootstrap, jQuery, atau icon font.</p></article><article><h3>A familiar foundation.</h3><p>Mesin flip berbasis PDFlipbook MIT, dengan UI yang dikembangkan dari reader intranet. Parser PDF menggunakan PDF.js.</p></article></div></section>
-  </main>
-  <footer>FlippyPDF · MIT · Bobby Fajar Christian <a href="THIRD_PARTY_NOTICES.md">Third-party notices</a></footer>
-  <script src="dist/js/flippy.min.js"></script>
-  <script src="site/demo.js"></script>
-</body>
-</html>
+reader.open();</code></pre></section>
+<section class="notes"><div><article><h3 data-i18n="filtersTitle">A softer reading space</h3><p data-i18n="filtersText">Original color, monochrome, sepia, high contrast, warm and cool filters. Color-neutral reading can help when colors are hard to distinguish; no preset suits everyone.</p></article><article><h3 data-i18n="compatTitle">A graceful way back</h3><p data-i18n="compatText">Modern browsers get the full viewer. Older browsers get the original PDF via the compatibility entry. Windows, macOS, Linux, Android and iOS follow browser capabilities.</p></article><article><h3 data-i18n="openTitle">Open source, clear origins</h3><p data-i18n="openText">MIT reader, PDFlipbook page engine and lazy Apache-2.0 PDF.js. No framework runtime. Keyboard controls, saved progress and bookmarks included.</p></article></div></section>
+</main><footer><span>FlippyPDF · MIT · Bobby Fajar Christian</span><a href="https://github.com/bobbyfch/flippypdf/blob/main/THIRD_PARTY_NOTICES.md">Third-party notices ↗</a></footer>
+<script src="dist/js/flippy.compat.js"></script><script src="site/demo.js"></script>
+</body></html>

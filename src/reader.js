@@ -120,6 +120,8 @@ export function createReader(global, engine) {
         var overlay = document.createElement('div');
         overlay.className = 'library-reader-overlay is-entering';
         overlay.dataset.flippyTheme = options.theme || 'auto';
+        var filters = { none: 'none', grayscale: 'grayscale(1)', sepia: 'sepia(.7)', contrast: 'grayscale(1) contrast(1.4)', warm: 'sepia(.35) saturate(.8)', cool: 'hue-rotate(180deg) saturate(.65)' };
+        overlay.style.setProperty('--flippy-page-filter', filters[options.filter] || 'none');
         if (options.zIndex) overlay.style.zIndex = String(options.zIndex);
         overlay.setAttribute('role', 'dialog');
         overlay.setAttribute('aria-modal', 'true');
@@ -136,6 +138,20 @@ export function createReader(global, engine) {
         header.appendChild(title);
         var actions = document.createElement('div');
         actions.className = 'library-reader-actions';
+        var filter = document.createElement('select');
+        filter.className = 'flippy-filter';
+        filter.setAttribute('aria-label', 'Reading filter / Filter baca');
+        ['Original', 'Black & white', 'Sepia', 'High contrast', 'Warm colors', 'Cool colors'].forEach(function (name, index) {
+            var option = document.createElement('option');
+            option.value = Object.keys(filters)[index]; option.textContent = name;
+            filter.appendChild(option);
+        });
+        filter.value = options.filter || 'none';
+        filter.addEventListener('change', function () {
+            options.filter = filter.value;
+            overlay.style.setProperty('--flippy-page-filter', filters[filter.value]);
+        });
+        actions.appendChild(filter);
         var marksButton = button('Tampilkan penanda dan pratinjau halaman', null, 'bookmarks');
         marksButton.setAttribute('aria-expanded', 'false');
         var soundButton = button('Aktifkan suara halaman', null, 'muted');
@@ -376,7 +392,7 @@ export function createReader(global, engine) {
         state.onKey = function (event) {
             if (event.key === 'Escape') { event.preventDefault(); close(); return; }
             if (event.key !== 'Tab') return;
-            var focusable = Array.prototype.filter.call(overlay.querySelectorAll('button:not([disabled]), a[href], input:not([disabled])'), function (node) {
+            var focusable = Array.prototype.filter.call(overlay.querySelectorAll('button:not([disabled]), a[href], input:not([disabled]), select:not([disabled])'), function (node) {
                 return !node.closest('[hidden]');
             });
             if (!focusable.length) return;
@@ -482,6 +498,7 @@ export function createReader(global, engine) {
                 pdfjsLegacySrc: options.pdfjsLegacySrc,
                 pdfjsLegacyWorkerSrc: options.pdfjsLegacyWorkerSrc,
                 cornerFold: true,
+                readingDirection: options.mode === 'manga' ? 'rtl' : (options.readingDirection || 'ltr'),
                 displayMode: options.mode === 'single' ? 'single' : 'auto',
                 maxScale: options.maxScale || options.scale || 1.75,
                 maxCanvasPixels: options.maxCanvasPixels || 2500000,

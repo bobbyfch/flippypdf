@@ -32,9 +32,7 @@ theme switch should pass `light` or `dark`. It is a modal reader, not a full
 PDF.js viewer: searchable/selectable text, PDF annotations, and form filling
 are not provided. Passwords can be supplied explicitly via the options.
 
-The original distribution and demo are archived under `dist/legacy/v1.0.2`
-and `example/legacy-demo-v1.html`. They retain their original dependencies and
-security limitations; prefer v2 for new integrations.
+The original distribution remains accessible through immutable historical Git tags. Unused legacy snapshots were removed from the current branch in v2.1.0.
 
 ## Intranet migration
 
@@ -43,7 +41,7 @@ CSS/JS at the release ref. Use `Flippy` instead of `LibraryCornerReader`, pass
 the existing URL/id/title/trigger, and use `storagePrefix:'library-corner:'`
 to preserve saved page/bookmarks/sound preference. Keep `media/ebook/{id}`,
 session authorization, Range serving, and DOM trigger selectors unchanged.
-Keep local vendor assets available for rollback; do not delete them.
+Unused local reader assets were removed after migration in v2.1.0; Git history retains the previous files.
 
 ## Validation scope
 

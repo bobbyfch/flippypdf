@@ -1,6 +1,6 @@
 {
   "name": "flippypdf",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "Framework-independent PDF flipbook with lazy PDF.js loading",
   "type": "module",
   "license": "MIT",

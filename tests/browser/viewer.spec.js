@@ -21,7 +21,7 @@ test.beforeEach(async ({ page }) => {
   await page.goto('/');
 });
 
-for (const mode of ['book', 'single', 'webtoon']) {
+for (const mode of ['book', 'single', 'webtoon', 'manga']) {
   test(`${mode}: ready, actual canvas, navigation, bookmark, close/reopen`, async ({ page }) => {
     const errors = []; page.on('pageerror', error => errors.push(error.message));
     await page.evaluate(async mode => { window.testViewer = new Flippy({ pdfUrl: '/test.pdf', mode, soundEnabled: false, duration: 0 }); await testViewer.open(); }, mode);

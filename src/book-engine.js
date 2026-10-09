@@ -314,6 +314,7 @@ export function createBookEngine(global) {
     injectStyles();
     var c = this.container;
     c.classList.add('fb-root');
+    if (this.opts.readingDirection === 'rtl') c.classList.add('fb-rtl');
     c.setAttribute('tabindex', '0');
     c.setAttribute('role', 'region');
     c.setAttribute('aria-label', 'PDF flipbook');
@@ -611,7 +612,7 @@ export function createBookEngine(global) {
     this._clampPan();
     this.stage.style.transform =
       'translate(' + (shift * this.zoom + this.panX).toFixed(2) + 'px,' + this.panY.toFixed(2) + 'px)' +
-      ' scale(' + this.zoom + ')';
+      ' scale(' + this.zoom + ')' + (this.opts.readingDirection === 'rtl' ? ' scaleX(-1)' : '');
   };
 
   PDFlipbook.prototype._clampPan = function () {
@@ -1188,8 +1189,8 @@ export function createBookEngine(global) {
       else if (e.key === 'End') { e.preventDefault(); self.goTo(self.numPages); }
       else if (e.key === 'PageDown') { e.preventDefault(); self.next(); }
       else if (e.key === 'PageUp') { e.preventDefault(); self.prev(); }
-      else if (e.key === 'ArrowRight') { e.preventDefault(); self.next(); }
-      else if (e.key === 'ArrowLeft') { e.preventDefault(); self.prev(); }
+      else if (e.key === 'ArrowRight') { e.preventDefault(); self.opts.readingDirection === 'rtl' ? self.prev() : self.next(); }
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); self.opts.readingDirection === 'rtl' ? self.next() : self.prev(); }
       else if (e.key === '+' || e.key === '=') { self.zoomIn(); }
       else if (e.key === '-') { self.zoomOut(); }
       else if (e.key === 'f' || e.key === 'F') { self.toggleFullscreen(); }
@@ -1224,6 +1225,12 @@ export function createBookEngine(global) {
     var dead = 0.25;
     if (Math.abs(f) < dead) return 0;
     return f > 0 ? 1 : -1;
+  };
+
+  PDFlipbook.prototype._readingX = function (x) {
+    if (this.opts.readingDirection !== 'rtl') return x;
+    var rect = this.book.getBoundingClientRect();
+    return rect.left + rect.right - x;
   };
 
   PDFlipbook.prototype._pointerDown = function (e) {
@@ -1264,7 +1271,7 @@ export function createBookEngine(global) {
 
     this.drag = {
       dir: dir, k: k, id: e.pointerId, mode: mode, rect: rect, scale: scale,
-      startX: e.clientX, lastX: e.clientX,
+      startX: this._readingX(e.clientX), lastX: this._readingX(e.clientX),
       lastT: performance.now(), vx: 0,
       moved: false, zone: e.currentTarget
     };
@@ -1272,7 +1279,7 @@ export function createBookEngine(global) {
     if (!single) this._beginShadowLerp(dir);
     if (mode === 'fold') {
       this._foldStart(dir, k, bottom);
-      this._foldRender(this._toLocalU(e.clientX), (e.clientY - rect.top) / scale);
+      this._foldRender(this._toLocalU(this._readingX(e.clientX)), (e.clientY - rect.top) / scale);
     }
 
     e.currentTarget.addEventListener('pointermove', this._onMove);
@@ -1291,15 +1298,15 @@ export function createBookEngine(global) {
     if (!d || e.pointerId !== d.id) return;
     var now = performance.now();
     var dt = now - d.lastT;
-    if (dt > 0) d.vx = (e.clientX - d.lastX) / dt;
-    d.lastX = e.clientX;
+    if (dt > 0) d.vx = (this._readingX(e.clientX) - d.lastX) / dt;
+    d.lastX = this._readingX(e.clientX);
     d.lastT = now;
 
-    var dx = (e.clientX - d.startX) / d.scale;
-    if (Math.abs(e.clientX - d.startX) > 6) d.moved = true;
+    var dx = (this._readingX(e.clientX) - d.startX) / d.scale;
+    if (Math.abs(this._readingX(e.clientX) - d.startX) > 6) d.moved = true;
 
     if (d.mode === 'fold') {
-      this._foldRender(this._toLocalU(e.clientX), (e.clientY - d.rect.top) / d.scale);
+      this._foldRender(this._toLocalU(this._readingX(e.clientX)), (e.clientY - d.rect.top) / d.scale);
       d.p = this._foldProgress();
       return;
     }
@@ -1373,7 +1380,7 @@ export function createBookEngine(global) {
 
   PDFlipbook.prototype._rootDown = function (e) {
     if (e.target.closest && e.target.closest('.fb-nav,.fb-tool')) return;
-    this.pointers[e.pointerId] = { x: e.clientX, y: e.clientY };
+    this.pointers[e.pointerId] = { x: this._readingX(e.clientX), y: e.clientY };
     var ids = Object.keys(this.pointers);
 
     if (ids.length === 2) {
@@ -1395,7 +1402,7 @@ export function createBookEngine(global) {
       this.pan = null;
       this.stage.classList.add('fb-live');
     } else if (ids.length === 1 && this.zoom > 1.02 && !this.drag) {
-      this.pan = { x: e.clientX, y: e.clientY, px: this.panX, py: this.panY };
+      this.pan = { x: this._readingX(e.clientX), y: e.clientY, px: this.panX, py: this.panY };
       this.stage.classList.add('fb-live');
       // capture so a mouse-up released outside the container still reaches us
       // (otherwise pan state and the fb-live class get stuck)
@@ -1407,7 +1414,7 @@ export function createBookEngine(global) {
   PDFlipbook.prototype._rootMove = function (e) {
     var pt = this.pointers[e.pointerId];
     if (!pt) return;
-    pt.x = e.clientX; pt.y = e.clientY;
+    pt.x = this._readingX(e.clientX); pt.y = e.clientY;
 
     if (this.pinch) {
       var ids = Object.keys(this.pointers);
@@ -1424,7 +1431,7 @@ export function createBookEngine(global) {
       return;
     }
     if (this.pan) {
-      this.panX = this.pan.px + (e.clientX - this.pan.x);
+      this.panX = this.pan.px + (this._readingX(e.clientX) - this.pan.x);
       this.panY = this.pan.py + (e.clientY - this.pan.y);
       this._applyStage();
     }

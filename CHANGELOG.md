@@ -1,3 +1,11 @@
+# 2.1.0 — 2026-10-09
+
+- Manga RTL, reading filters, setFilter API and ES5 compatibility loader with original-PDF fallback.
+- Green bird identity, bilingual EN/ID Pages with system/light/dark themes, crawlable SEO metadata and sitemap.
+- Eight-page illustrated Limaraya friendship story replaces the sample at the same URL.
+- React/Svelte/Angular/Astro/Web Component integration recipes; existing Vue adapter retained.
+- Remove unused legacy snapshots from current branch; existing version tags and CDN root paths retained.
+
 # Changelog
 
 ## 2.0.0

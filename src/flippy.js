@@ -3,7 +3,8 @@ import { createBookEngine } from './book-engine.js';
 import { createReader } from './reader.js';
 import { Webtoon } from './webtoon.js';
 
-export const VERSION = '2.0.0';
+export const VERSION = '2.1.0';
+export const FILTERS = { none: 'none', grayscale: 'grayscale(1)', sepia: 'sepia(.7)', contrast: 'grayscale(1) contrast(1.4)', warm: 'sepia(.35) saturate(.8)', cool: 'hue-rotate(180deg) saturate(.65)' };
 const cssLoads = new Map();
 const bookEngines = new WeakMap();
 let activeViewer;
@@ -34,7 +35,9 @@ export function createFlippyClass(defaultAssetBase) {
     constructor(options = {}) {
       super();
       this.options = { mode: 'book', theme: 'auto', ...options };
-      if (!['book', 'single', 'webtoon'].includes(this.options.mode)) throw new TypeError('mode must be book, single or webtoon');
+      if (!['book', 'single', 'webtoon', 'manga'].includes(this.options.mode)) throw new TypeError('mode must be book, single, webtoon or manga');
+      if (this.options.filter && !Object.prototype.hasOwnProperty.call(FILTERS, this.options.filter)) throw new TypeError('Unknown reading filter');
+      if (this.options.readingDirection && !['ltr', 'rtl'].includes(this.options.readingDirection)) throw new TypeError('readingDirection must be ltr or rtl');
       if (!['auto', 'light', 'dark'].includes(this.options.theme)) throw new TypeError('theme must be auto, light or dark');
       this._generation = 0;
       this._pending = null;
@@ -126,6 +129,15 @@ export function createFlippyClass(defaultAssetBase) {
     zoomOut() { this.book?.zoomOut(); return this; }
     setZoom(value) { this.book?.setZoom(value); return this; }
     toggleFullscreen() { this.book?.toggleFullscreen(); return this; }
+    setFilter(value) {
+      if (!Object.prototype.hasOwnProperty.call(FILTERS, value)) throw new TypeError('Unknown reading filter');
+      this.options.filter = value;
+      if (this.overlay) {
+        this.overlay.style.setProperty('--flippy-page-filter', FILTERS[value]);
+        this.overlay.querySelector('.flippy-filter').value = value;
+      }
+      return this;
+    }
     close() {
       ++this._generation;
       this._reader?.close(true);

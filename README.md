@@ -1,171 +1,117 @@
-<p align="center"><img src="README.png" width="160" alt="FlippyPDF"></p>
+<p align="center"><img src="logo.svg" width="88" alt="FlippyPDF green bird"></p>
+<h1 align="center">FlippyPDF</h1>
+<p align="center"><strong>Your PDF. Your reading rhythm. 🌿</strong><br>Book flip · Manga RTL · Webtoon · Single page</p>
+<p align="center"><a href="https://github.com/bobbyfch/flippypdf/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/bobbyfch/flippypdf/actions/workflows/ci.yml/badge.svg"></a> <img alt="MIT" src="https://img.shields.io/badge/license-MIT-31725a"> <img alt="Release" src="https://img.shields.io/github/v/release/bobbyfch/flippypdf?color=31725a"> <img alt="TypeScript ready" src="https://img.shields.io/badge/TypeScript-ready-3178c6"> <img alt="Framework independent" src="https://img.shields.io/badge/framework-independent-31725a"></p>
 
-# FlippyPDF 2.0
+[Live demo](https://bobbyfch.github.io/flippypdf/) · [Integrations](docs/integrations.md) · [Browser support](docs/compatibility.md) · [Changelog](CHANGELOG.md)
 
-PDF reader dengan **book flip, webtoon, dan single page**. Core vanilla JavaScript,
-inline SVG, tanpa Bootstrap, jQuery, atau icon font. PDF.js tetap menjadi mesin
-PDF internal, dimuat otomatis ketika reader dibuka.
+A lightweight PDF reading interface. **No Bootstrap, jQuery or icon font required.** PDF.js loads on demand; you don't need to initialize it yourself.
 
-[Demo GitHub Pages](https://bobbyfch.github.io/flippypdf/) ·
-[Integrations](docs/integrations.md) · [Migration](docs/release-v2.md) ·
-[Changelog](CHANGELOG.md) · [MIT license](LICENSE)
+🇮🇩 Reader PDF dengan empat mode, bookmark, progres tersimpan, dan filter warna. Bisa dipasang pada CI3, Laravel, Vue, React, Svelte, Angular, Astro, atau HTML biasa. Demo mendukung EN/ID serta light/dark/system.
 
-## Quick start: CDN
+## ✨ Why Flippy?
 
-Tidak perlu memasang atau menginisialisasi PDF.js sendiri.
+| Read your way | Fit your project |
+| --- | --- |
+| 📖 Book folds and two-page spreads | Vanilla JavaScript + ESM |
+| 🗯️ Manga RTL turns and arrow keys | TypeScript declarations, SSR-safe import |
+| 📜 Webtoon with nearby-page rendering | Vue component; additional integration examples |
+| 🎯 Responsive single-page focus | Bootstrap/Tailwind can stay in your app |
+| 🌗 Themes and reduced motion | Auth headers, credentials, byte-data PDFs |
+| 🔖 Bookmarks and saved progress | Lazy PDF.js and bounded canvas sizes |
+| 🎨 Monochrome, sepia, contrast, warm/cool | Compatibility entry with direct-PDF fallback |
+
+[Read **Limaraya**, our 8-page illustrated friendship story](example/limarayamusic.pdf). Original fiction; AI-assisted illustrations. [Story sources and prompts](example/story/README.md).
+
+## Quick start
 
 ```html
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.0.0/dist/css/flippy.min.css">
-<script src="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.0.0/dist/js/flippy.min.js"></script>
-<button type="button" id="read">Baca PDF</button>
+<script src="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.1.0/dist/js/flippy.min.js"></script>
+<button id="read" type="button">Read PDF</button>
 <script>
-const viewer = new Flippy({
-  pdfUrl: '/media/ebook/42',
-  title: 'My book',
-  mode: 'book',
-  theme: 'auto'
+const reader = new Flippy({
+  pdfUrl: '/books/story.pdf', title: 'My story',
+  mode: 'book', // book | single | webtoon | manga
+  theme: 'auto', soundEnabled: false
 });
-document.querySelector('#read').addEventListener('click', () => viewer.open());
+document.querySelector('#read').addEventListener('click', () => {
+  reader.open().catch(error => console.error(error));
+});
 </script>
 ```
 
-Stylesheet juga dimuat otomatis saat open jika belum disertakan. Menyertakan
-link CSS di atas memberi kontrol CSP dan loading lebih jelas. Jalur CDN JS,
-CSS, dan sound lama dipertahankan. Tag v1 tidak diubah; v2.0.0 memakai tag rilis baru, tanpa mengganti tag lama. Gunakan ref/commit yang sudah diuji
-untuk production. URL tanpa versi mengikuti perkembangan repository dan cache CDN.
+CSS loads automatically on first open. For explicit loading/CSP:
 
-## ESM / TypeScript
+```html
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.1.0/dist/css/flippy.min.css">
+```
 
-Paket belum diterbitkan otomatis ke npm registry. Gunakan ref GitHub:
+Pin releases in production. Existing root JS/CSS/sound paths remain; historical tags are never rewritten. Unused snapshots were removed from the current branch. [v1 migration](docs/release-v2.md).
+
+### ESM / TypeScript
 
 ```sh
-npm install github:bobbyfch/flippypdf#v2.0.0
+npm install github:bobbyfch/flippypdf#v2.1.0
 ```
 
 ```ts
-import Flippy, { type FlippyOptions } from 'flippypdf';
-const options: FlippyOptions = {
-  pdfUrl: '/api/ebook/42',
-  mode: 'single',
-  assetBase: 'https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.0.0/dist/'
+import Flippy from 'flippypdf';
+const reader = new Flippy({ pdfUrl: '/story.pdf', mode: 'manga', filter: 'grayscale' });
+await reader.open();
+reader.next().setFilter('sepia');
+reader.addEventListener('pagechange', event => console.log(event));
+reader.destroy(); // component cleanup
+```
+
+Bundled imports use the pinned CDN for renderer assets. Self-hosting/offline: serve all of `dist/` and set `assetBase: '/assets/flippy/dist/'`. Keep module and worker versions matched.
+
+### Older browsers
+
+Use `dist/js/flippy.compat.js` instead of the main script. This ES5 entry checks capabilities before loading the modern viewer:
+
+```html
+<script src="https://cdn.jsdelivr.net/gh/bobbyfch/flippypdf@v2.1.0/dist/js/flippy.compat.js"></script>
+<script>
+document.getElementById('read').onclick = function () {
+  var start = function () { new Flippy({ pdfUrl: '/story.pdf' }).open(); };
+  if (window.FlippyReady) FlippyReady.then(start).catch(function () {
+    window.location.assign('/story.pdf');
+  }); else start();
 };
-const viewer = new Flippy(options);
-await viewer.open();
-viewer.goTo(3);
-// Saat component/route dilepas:
-viewer.destroy();
+</script>
 ```
 
-Raw ESM: `dist/js/flippy.esm.js`. Import dan constructor aman saat SSR;
-`open()` memerlukan DOM dan dipanggil setelah mount. Bundler memakai CDN
-pinned sebagai default asset; self-hosting memerlukan seluruh folder dist dan
-`assetBase` yang menunjuk URL folder tersebut.
+Keep a normal PDF link for disabled JavaScript and load failures. Very old browsers receive the original PDF. [Verified capabilities and limits](docs/compatibility.md).
 
-## Features
+## Reading API
 
-- Book flip: corner fold, bayangan kertas, zoom/pan, fullscreen, keyboard.
-- Single page otomatis untuk layar sempit; webtoon untuk scroll vertikal.
-- Thumbnail saat sidebar diperlukan, bookmark, progres, page jump, resume posisi.
-- Light/dark/auto, reduced motion, focus restoration, dan suara opsional.
-- URL tanpa suffix .pdf, binary PDF data, headers, credentials, dan password.
-- Pembatalan loading/render saat destroy; batas pixel canvas untuk memori.
-- Optional Vue 3 adapter; contoh CI3, Laravel, TypeScript, Bootstrap/Tailwind.
+`open()` returns a promise; `close()`/`destroy()` cancel work. Controls: `next()`, `prev()`, `goTo(page)`, `firstPage()`, `lastPage()`, `zoomIn()`, `zoomOut()`, `setZoom(value)`, `toggleFullscreen()`, `setFilter(value)`. Position: `currentPage()` and `totalPages`.
 
-Satu modal aktif pada satu waktu. Membuka instance lain menutup reader sebelumnya.
-Text selection/search, annotation, dan pengisian form PDF belum tersedia.
-Default string UI memakai Bahasa Indonesia; mode webtoon memiliki label navigasi
-English. Belum ada klaim multi-language viewer penuh.
+Manga preserves PDF page numbers: `next()` increases the page number; **ArrowLeft** advances in RTL. Source pages must already be in reading order. `readingDirection: 'rtl'` also works with book/single.
 
-## API
+Filters: `none`, `grayscale`, `sepia`, `contrast`, `warm`, `cool`. Grayscale avoids relying on hue; warm/cool presets are personal adjustments, not medical color-blindness correction. Filters affect canvases, never the source PDF/download.
 
-```js
-await viewer.open(); // document ready; reject jika gagal / AbortError saat ditutup
-viewer.next(); viewer.prev(); viewer.goTo(5);
-viewer.firstPage(); viewer.lastPage();
-viewer.zoomIn(); viewer.zoomOut(); viewer.setZoom(2);
-viewer.toggleFullscreen();
-viewer.currentPage(); viewer.totalPages;
-viewer.close(); viewer.destroy(); // aman dipanggil berulang
-viewer.addEventListener('pagechange', event => console.log(event.detail.page));
-viewer.addEventListener('error', event => console.error(event.detail.error));
-```
+Events: `ready`, `pagechange`, `pageerror`, `close`, `error`. Options include `startPage`, `id`, `storagePrefix`, `maxScale`, `maxCanvasPixels`, `duration`, `httpHeaders`, `withCredentials`, `password`, `data`, `assetBase`, `pdfBuild`, `zIndex`. [Full declarations](src/index.d.ts).
 
-Alias lama: nextPage, prevPage, goToPage. Events: ready, pagechange, pageerror,
-error, close. Callback: onReady, onPageChange, onPageError, onError, onClose.
+## Privacy & accessibility
 
-| Option | Default / fungsi |
-| --- | --- |
-| pdfUrl / url | URL HTTP(S)/blob; atau gunakan data |
-| data | ArrayBuffer / Uint8Array, disalin sebelum diproses |
-| mode | book / single / webtoon; default book |
-| title | Judul reader; default E-book |
-| theme | auto / light / dark |
-| startPage | Posisi awal; default posisi tersimpan atau 1 |
-| soundEnabled | Preferensi tersimpan; suara awal mati pada reduced motion |
-| soundUrl | Asset audio Flippy, relatif ke base distribusi |
-| assetBase | Base asset CDN/self-hosted, berakhiran slash |
-| cssUrl / autoStyles | Override stylesheet / false jika dikelola aplikasi |
-| pdfBuild | modern atau legacy dari PDF.js versi yang sama |
-| pdfjsSrc / pdfWorkerSrc | Override module + worker dari versi yang cocok |
-| pdfjsLib | Engine yang telah dimuat dan dikonfigurasi aplikasi |
-| maxScale | 1.75, dibatasi 0.5–3 |
-| maxCanvasPixels | 2,500,000 per canvas; batas konfigurasi 250,000–8,000,000 |
-| duration | 560ms, otomatis 0 pada reduced motion |
-| id / storagePrefix | Kunci resume/bookmark; default prefix flippy: |
-| httpHeaders / withCredentials | Akses endpoint PDF aplikasi |
-| password | Password PDF bila diperlukan |
-| zIndex | 12010, dapat disesuaikan |
-| cMapUrl / standardFontDataUrl | Default asset PDF.js dalam dist |
-
-Opsi render/sizing v1 masih diterima, tetapi perilaku numeriknya berubah.
-Lihat [migration notes](docs/release-v2.md) sebelum mengganti production.
-
-Keyboard saat stage fokus: ←/→, PageUp/PageDown, Home/End, +/-; Esc menutup
-modal. Engine book juga menyediakan F untuk fullscreen. Tab tetap dalam modal.
-
-## Performance and browser support
-
-Build viewer JS+CSS sekitar **21 KiB gzip**, di luar suara dan mesin PDF.
-PDF.js 4.10.38 module+worker sekitar **491 KiB gzip**, lazy-loaded. Gzip dihitung
-lokal; transfer nyata bergantung pada server/CDN. Manifest ukuran/hash berada
-di `dist/manifest.json`. CDN tidak otomatis membuat PDF lebih kecil.
-
-Target: browser evergreen dengan ES2020, module workers, ResizeObserver,
-IntersectionObserver, dan Pointer Events. Legacy build PDF.js membantu browser
-yang belum memiliki API modern tertentu; bukan jaminan untuk IE atau seluruh
-browser lama. Local automation memakai Chromium/Edge. Safari/iOS dan Firefox
-perlu validasi perangkat tersendiri sebelum dijanjikan sebagai tested support.
+Selected demo PDFs stay in the browser; no upload or analytics. Bookmarks/progress use localStorage when available. CDN requests follow normal browser networking. Keyboard controls, focus trapping, labelled actions and reduced motion are included. PDFs render to canvases; provide an accessible original or alternative content for screen-reader users.
 
 ## Development
-
-Node.js 20+.
 
 ```sh
 npm ci
 npm run build
 npm test
 npm run test:types
-npx playwright install chromium
 npm run test:browser
 npm run serve
 ```
 
-Demo: http://127.0.0.1:4173. Di Windows yang memiliki Edge, test lokal memakai
-Edge headless. CI memakai Chromium. Source berada di src; build deterministik
-menghasilkan dist, tipe, asset PDF.js, dan manifest. GitHub Pages menyajikan
-demo statis dari index.html / site / dist / example.
+Tests cover real PDF pixels, layouts, RTL, filters, Vue lifecycle, mobile themes, failures/cancellation and auth headers. CI uses Chromium; local checks use Edge. Platform lists do not imply testing every OS/version.
 
-## Troubleshooting
+## Open source 🌱
 
-- Gunakan HTTP server, bukan file://.
-- PDF berbeda origin memerlukan CORS; private PDF tetap di endpoint aplikasi.
-- Module dan worker PDF.js harus dari versi yang sama.
-- CDN worker membutuhkan worker-src blob:; lihat panduan CSP pada integrations.
-- Jika loading gagal, viewer memberikan tautan membuka PDF langsung.
-- Source viewer memuat PDF sebagai canvas; fitur PDF.js viewer lengkap tidak tersedia.
+MIT © Bobby Fajar Christian. Engine adapted from [PDFlipbook](https://github.com/SympleNZ/PDFlipbook) (MIT), renderer [PDF.js](https://github.com/mozilla/pdf.js) (Apache-2.0). [Third-party notices](THIRD_PARTY_NOTICES.md).
 
-## License and credits
-
-MIT: Bobby Fajar Christian. Book engine berbasis PDFlipbook MIT, Symple NZ.
-PDF.js: Mozilla dan kontributor, Apache-2.0. Lisensi pihak ketiga tetap dibawa
-dalam distribusi; lihat [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+If Flippy makes your project easier to read, a ⭐ helps others find it. Bug reports are welcome: include a reproducible PDF, browser version, mode and console error.

@@ -1,0 +1,9 @@
+# FlippyPDF
+> Open-source JavaScript PDF reader. PDF.js loads on demand. No Bootstrap or jQuery required.
+- Demo: https://bobbyfch.github.io/flippypdf/
+- Source and installation: https://github.com/bobbyfch/flippypdf
+- Documentation: https://github.com/bobbyfch/flippypdf/blob/main/docs/integrations.md
+- License: MIT. PDF.js is Apache-2.0; PDFlipbook is MIT.
+- Modes: book, single, webtoon, manga (right-to-left).
+- Privacy: selected demo files are read in the browser; the demo does not upload them.
+- Compatibility: modern browsers; older browsers can open/download the original PDF. OS support depends on the browser.
