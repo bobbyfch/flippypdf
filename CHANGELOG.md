@@ -1,4 +1,4 @@
-# 2.2.0 — 2026-10-09
+# Changelog
 
 ## 3.0.0 — Sela / 2026-10-09
 
@@ -10,7 +10,7 @@
 - Portrait/spread adaptation preserves portrait page during rotation; supported browsers can request orientation lock in fullscreen.
 - First-visit public Pages language uses bounded IP-country lookup, with manual-choice priority, browser-language fallback and `?geo=off` bypass. The embedding library makes no geolocation requests.
 - Add regression coverage for real embedded PDF bookmarks, EPUB anchors, narration lifecycle, new formats, notes, actual offline PDF reload and extension-safe URLs.
-
+## 2.2.0 — 2026-10-09
 
 - Lazy EPUB/CBZ adapters, optional external DjVu decoder, and real format samples.
 - Seamless configurable webtoon spacing, Ctrl-wheel/touch zoom, global keyboard help and shortcuts.
@@ -19,15 +19,13 @@
 - English and Indonesian README; explicit format, resource and decoder license limits.
 - Preserve PDF API and historical CDN paths/tags.
 
-# 2.1.0 — 2026-10-09
+## 2.1.0 — 2026-10-09
 
 - Manga RTL, reading filters, setFilter API and ES5 compatibility loader with original-PDF fallback.
 - Green bird identity, bilingual EN/ID Pages with system/light/dark themes, crawlable SEO metadata and sitemap.
 - Eight-page illustrated Limaraya friendship story replaces the sample at the same URL.
 - React/Svelte/Angular/Astro/Web Component integration recipes; existing Vue adapter retained.
 - Remove unused legacy snapshots from current branch; existing version tags and CDN root paths retained.
-
-# Changelog
 
 ## 2.0.0
 
